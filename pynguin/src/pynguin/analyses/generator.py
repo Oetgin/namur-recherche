@@ -1,0 +1,412 @@
+#  This file is part of Pynguin.
+#
+#  SPDX-FileCopyrightText: 2019–2025 Pynguin Contributors
+#
+#  SPDX-License-Identifier: MIT
+"""Handles type generator functions.
+
+Generators can be either GenericCallableAccessibleObjects or GenericEnum objects.
+"""
+
+import functools
+import itertools
+from abc import abstractmethod
+from collections import defaultdict
+
+import pynguin.configuration as config
+from pynguin.analyses.typesystem import AnyType, NoneType, ProperType, TypeSystem, is_primitive_type
+from pynguin.ga.operators.selection import Selectable, SelectionFunction
+from pynguin.utils.generic.genericaccessibleobject import (
+    GenericAccessibleObject,
+    GenericCallableAccessibleObject,
+)
+from pynguin.utils.orderedset import FrozenOrderedSet, OrderedSet
+
+
+class GeneratorFitnessFunction:
+    """Interface for a fitness function for type generators."""
+
+    @abstractmethod
+    def compute_fitness(
+        self,
+        to_generate: ProperType,
+        generator: GenericCallableAccessibleObject,
+        type_distance: int | None = None,
+    ) -> float:
+        """Compute the fitness score for a generator.
+
+        Args:
+            to_generate: The type to generate.
+            generator: The generator function.
+            type_distance: The distance between the type to generate and the return type
+                of the generator. If None, the distance must be computed.
+
+        Returns:
+            The computed fitness score or infinity if the generator is not suitable.
+        """
+
+    @abstractmethod
+    def is_maximisation_function(self) -> bool:
+        """Do we need to maximise or minimise this function?
+
+        Returns:
+             Whether this is a maximisation function
+        """
+
+
+class HeuristicGeneratorFitnessFunction(GeneratorFitnessFunction):
+    """A minimizing fitness function for type generators.
+
+    Some type generator functions are better suited to generate objects of a specific
+    type than others. For example, the constructor of the class we want to generate might
+    be a good choice. However, to allow for diversity in the generated test cases,
+    we also want to consider other generator functions, while still preferring the
+    constructor.
+
+    This fitness function allows for a ranking regarding the `suitability` of a generator
+    function for a certain type based on the following heuristics:
+
+    1. A constructor (__init__) is better than any other type generator function, as it
+        is often specifically designed to generate objects of the type.
+    2. The more parameters a generator function has, the worse it is, as we need to provide
+        values for these parameters as well.
+    3. The deeper the hierarchy distance between the type to generate and the return type
+        of the generator function, the worse it is, as the match is less direct.
+
+    A score of 0 is optimal and given for a constructor of the exact type with no
+    parameters. Everything else is penalized and thus gets a higher score (= bad).
+    """
+
+    def __init__(
+        self,
+        type_system: TypeSystem,
+        *,
+        not_constructor_penalty: float = config.configuration.generator_selection.generator_not_constructor_penalty,  # noqa: E501
+        param_penalty: float = config.configuration.generator_selection.generator_param_penalty,
+        hierarchy_penalty: float = config.configuration.generator_selection.generator_hierarchy_penalty,  # noqa: E501
+        any_type_penalty: float = config.configuration.generator_selection.generator_any_type_penalty,  # noqa: E501
+    ) -> None:
+        """Create a new fitness function."""
+        self._type_system = type_system
+        self._constructor_penalty = not_constructor_penalty
+        self._param_penalty = param_penalty
+        self._hierarchy_penalty = hierarchy_penalty
+        self._any_type_penalty = any_type_penalty
+
+    @functools.lru_cache(maxsize=16384)
+    def compute_fitness(
+        self,
+        to_generate: ProperType,
+        generator: GenericCallableAccessibleObject,
+        type_distance: int | None = None,
+    ) -> float:
+        """Compute the fitness score for a suitable generator. Lower is better.
+
+        Computes the fitness score for a generator function if it is suitable for the type
+        to generate. The generator is suitable if it may produce objects of the type to
+        generate or a subtype of it.
+
+        This method is performance-critical - even calling get_num_parameters() repeatedly
+        can be expensive. Therefore, we use a cache to store the results of this function.
+
+        Args:
+            to_generate: The type to generate.
+            generator: The generator function.
+            type_distance: The distance between the type to generate and the return type
+                of the generator. If None, the distance is computed.
+
+        Returns:
+            The computed fitness score or infinity if the generator is not suitable.
+        """
+        fitness: float = 0.0
+
+        # Penalize non-constructors
+        if not generator.is_constructor():
+            fitness += self._constructor_penalty
+
+        # Penalize for each parameter
+        param_count = generator.get_num_parameters()
+        fitness += self._param_penalty * param_count
+
+        # Penalize deeper hierarchy distances
+        if type_distance is None:
+            type_distance = self._compute_hierarchy_distance(to_generate, generator)
+
+        if type_distance is not None:
+            fitness += self._hierarchy_penalty * type_distance
+        else:
+            return float("inf")
+
+        return fitness
+
+    def _compute_hierarchy_distance(
+        self, to_generate: ProperType, generator: GenericCallableAccessibleObject
+    ) -> int | None:
+        """The distance between the type to generate and the return type of the generator.
+
+        The hierarchy distance is the number of subtypes between the type to generate and
+        the return type of the generator. If the return type is not a subtype of the type
+        to generate, None is returned.
+
+        Args:
+            to_generate: The type to generate.
+            generator: The generator function to check the return type of.
+
+        Returns:
+            The distance or None if the return type is not a subtype of the type.
+        """
+        return_type = generator.inferred_signature.return_type
+        assert return_type is not None, "Return type must not be None for a type generator"
+        return self._type_system.subtype_distance(to_generate, return_type)
+
+    def is_maximisation_function(self) -> bool:  # noqa: D102
+        return False
+
+
+class _Generator(Selectable):
+    """Allows selecting a generator based on its fitness value for a type to generate.
+
+    To calculate the fitness value, we need to have the generator, the type to generate,
+    and a fitness function. The subtype distance can be calculated during the fitness
+    calculation or be provided directly.
+    """
+
+    __slots__ = ("_fitness_function", "_generator", "_subtype_distance", "_type_to_generate")
+
+    def __init__(
+        self,
+        generator: GenericAccessibleObject,
+        type_to_generate: ProperType,
+        fitness_function: GeneratorFitnessFunction,
+        subtype_distance: int | None = None,
+    ):
+        """Create a new generator.
+
+        Args:
+            generator: The generator to select.
+            type_to_generate: The type to generate.
+            fitness_function: The fitness function to use.
+            subtype_distance: The subtype distance between the type to generate and the
+                generated type.
+        """
+        self._generator = generator
+        self._type_to_generate = type_to_generate
+        self._fitness_function = fitness_function
+        self._subtype_distance = subtype_distance
+
+    @property
+    def generator(self) -> GenericAccessibleObject:
+        """Get the generator function."""
+        return self._generator
+
+    def get_fitness(self) -> float:
+        """Get the fitness value of this generator."""
+        return self.get_fitness_for(self._fitness_function)
+
+    def get_fitness_for(self, fitness_function: GeneratorFitnessFunction) -> float:
+        """Get the fitness value of this generator for a specific fitness function.
+
+        Args:
+            fitness_function: The fitness function to use.
+        """
+        # Can only be GenericEnum, as only GenericCallableAccessibleObjects and
+        # GenericEnums are added as generators
+        if not isinstance(self._generator, GenericCallableAccessibleObject):
+            return 0.0
+
+        return fitness_function.compute_fitness(
+            self._type_to_generate, self._generator, self._subtype_distance
+        )
+
+    def __str__(self):
+        return str(self._generator)
+
+    def __repr__(self):
+        return self.__str__()
+
+
+class GeneratorProvider:
+    """Provides type generator functions and their fitness values."""
+
+    def __init__(
+        self,
+        type_system: TypeSystem,
+        selection_function: SelectionFunction[_Generator],
+    ):
+        """Create a new generator provider.
+
+        Args:
+            type_system: The type system to use.
+            selection_function: The selection function to use.
+        """
+        self._generators: dict[ProperType, OrderedSet[GenericAccessibleObject]] = defaultdict(
+            OrderedSet
+        )
+        self._type_system = type_system
+        self._fitness_function: GeneratorFitnessFunction = HeuristicGeneratorFitnessFunction(
+            type_system
+        )
+        self._selection_function: SelectionFunction[_Generator] = selection_function
+
+    def add(self, generator: GenericAccessibleObject) -> None:
+        """Add a new generator.
+
+        The return type might be AnyType.
+
+        Args:
+            generator: The generator to add.
+        """
+        generated_type = generator.generated_type()
+        if isinstance(generated_type, NoneType) or generated_type.accept(is_primitive_type):
+            return
+        self._generators[generated_type].add(generator)
+
+    def get_all(self) -> dict[ProperType, OrderedSet[GenericAccessibleObject]]:
+        """Get all generators."""
+        return self._generators
+
+    def get_all_types(self) -> OrderedSet[ProperType]:
+        """Get all types for which generators are available."""
+        return OrderedSet(self._generators.keys())
+
+    def get_for_type(self, proper_type: ProperType) -> OrderedSet[GenericAccessibleObject]:
+        """Get all generators for a specific type.
+
+        Args:
+            proper_type: The type to get the generators for.
+
+        Returns:
+            The generators for the given type.
+        """
+        return self._generators.get(proper_type, OrderedSet())
+
+    def remove_all_generators_for(self, proper_type: ProperType) -> None:
+        """Remove all generators for a specific type.
+
+        Args:
+            proper_type: The type to remove the generators for.
+        """
+        del self._generators[proper_type]
+
+    def add_for_type(
+        self, proper_type: ProperType, generator: GenericCallableAccessibleObject
+    ) -> None:
+        """Add a set of generators for a specific type.
+
+        Args:
+            proper_type: The type to add the generators for.
+            generator: The generator to add.
+        """
+        self._generators[proper_type].add(generator)
+
+    @functools.lru_cache(maxsize=1024)
+    def _sorted_generators(
+        self, type_generators: FrozenOrderedSet[_Generator]
+    ) -> OrderedSet[_Generator]:
+        return OrderedSet(sorted(type_generators, key=lambda x: x.get_fitness()))
+
+    def _select_generator(
+        self, type_generators: FrozenOrderedSet[_Generator]
+    ) -> GenericAccessibleObject:
+        """Select a generator from a set of generators.
+
+        Compared to random selection this adds an overhead by computing a fitness value
+        for each generator and sorting them. We can cache both operations so the overhead
+        is mostly limited to the first iteration.
+
+        Args:
+            type_generators: The set of generators to select from.
+
+        Returns:
+            The selected generator.
+        """
+        generator_objects = self._sorted_generators(type_generators)
+        # As builtins.object is a superclass of all classes, we can be sure that
+        # there is always at least one generator available
+        selected = self._selection_function.select(list(generator_objects))[0]
+        return selected.generator
+
+    @functools.lru_cache(maxsize=1024)
+    def _get_generators_for(self, typ: ProperType) -> OrderedSet[_Generator]:
+        """Get all generators for a specific type."""
+        if isinstance(typ, AnyType):
+            # Just take everything when it's Any.
+            return self._get_all_generators(typ)
+
+        if typ.accept(is_primitive_type):
+            return OrderedSet()
+
+        generators: OrderedSet[_Generator] = OrderedSet()
+        for generated_typ in self.get_all_types():
+            if (distance := self._type_system.subtype_distance(typ, generated_typ)) is not None:
+                generators.update(self._get_for_type(generated_typ, distance))
+
+        return generators
+
+    @functools.lru_cache(maxsize=1024)
+    def _get_for_type(self, typ: ProperType, distance: int) -> OrderedSet[_Generator]:
+        generators: OrderedSet[_Generator] = OrderedSet()
+        for generator in self.get_for_type(typ):
+            generators.add(_Generator(generator, typ, self._fitness_function, distance))
+        return generators
+
+    def _get_all_generators(self, typ: ProperType) -> OrderedSet[_Generator]:
+        all_generators = itertools.chain.from_iterable(self.get_all().values())
+        return OrderedSet(
+            _Generator(generator, typ, self._fitness_function) for generator in all_generators
+        )
+
+    def select_generator_for(self, parameter_type: ProperType) -> GenericAccessibleObject | None:
+        """Select a generator for a specific type.
+
+        Args:
+            parameter_type: The type to select a generator for.
+
+        Returns:
+            The selected generator.
+        """
+        type_generators = self._get_generators_for(parameter_type)
+        if type_generators:
+            return self._select_generator(type_generators.freeze())
+        return None
+
+    def clear_generator_cache(self):
+        """Clear the generator cache."""
+        self._get_generators_for.cache_clear()
+        self._sorted_generators.cache_clear()
+        self._get_for_type.cache_clear()
+
+
+class RandomGeneratorProvider(GeneratorProvider):
+    """Provides type generator functions without considering fitness values."""
+
+    def __init__(self, type_system: TypeSystem, selection_function: SelectionFunction[_Generator]):
+        """Create a new generator provider.
+
+        Args:
+            type_system: The type system to use.
+            selection_function: The selection function to use.
+        """
+        super().__init__(type_system, selection_function)
+
+    @functools.lru_cache(maxsize=1024)
+    def _get_generators_for(self, typ: ProperType) -> OrderedSet[_Generator]:
+        """Get all generators for a specific type."""
+        if isinstance(typ, AnyType):
+            # Just take everything when it's Any.
+            return self._get_all_generators(typ)
+
+        results: OrderedSet[GenericAccessibleObject] = OrderedSet()
+        for gen_type, generators in self.get_all().items():
+            if self._type_system.is_maybe_subtype(gen_type, typ):
+                results.update(generators)
+
+        return OrderedSet(
+            _Generator(generator, typ, self._fitness_function) for generator in results
+        )
+
+    @functools.lru_cache(maxsize=0)  # Required to avoid mypy error
+    def _sorted_generators(
+        self, type_generators: FrozenOrderedSet[_Generator]
+    ) -> OrderedSet[_Generator]:
+        return OrderedSet(type_generators)

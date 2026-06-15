@@ -1,0 +1,169 @@
+#  This file is part of Pynguin.
+#
+#  SPDX-FileCopyrightText: 2019–2026 Pynguin Contributors
+#
+#  SPDX-License-Identifier: MIT
+#
+"""Provide abstract selection function."""
+
+from __future__ import annotations
+
+from abc import ABC, abstractmethod
+from math import sqrt
+from typing import Generic, TypeVar
+
+import pynguin.configuration as config
+from pynguin.utils import randomness
+
+
+class Selectable(ABC):
+    """An abstract base class for selectable objects.
+
+    Selectable objects are objects to which a SelectionFunction can be applied. In order
+    to apply a selection function, the object must provide a fitness value.
+    """
+
+    @abstractmethod
+    def get_fitness(self) -> float:
+        """Provide the fitness value of this selectable object.
+
+        Returns:
+            The fitness value of this selectable object.
+        """
+
+    @abstractmethod
+    def get_fitness_for(self, fitness_function) -> float:
+        """Provide the fitness value of this selectable object for a specific fitness function.
+
+        Args:
+            fitness_function: The fitness function to consider.
+
+        Returns:
+            The fitness value of this selectable object for the given fitness function.
+        """
+
+
+T = TypeVar("T", bound=Selectable)
+
+
+class SelectionFunction(Generic[T]):
+    """Abstract base class for selection functions."""
+
+    def __init__(self) -> None:  # noqa: D107
+        self._maximize = True
+
+    @abstractmethod
+    def get_index(self, population: list[T]) -> int:
+        """Provide an index within the population.
+
+        Args:
+            population: A list of chromosomes, the population
+
+        Returns:
+            The index within the population  # noqa: DAR202
+        """
+
+    def select(self, population: list[T], number: int = 1) -> list[T]:
+        """Return N parents.
+
+        Args:
+            population: A list of chromosomes, the population
+            number: The number of elements to select
+
+        Returns:
+            A list of chromosomes that was selected
+        """
+        return [population[self.get_index(population)] for _ in range(number)]
+
+    @property
+    def maximize(self):
+        """Do we maximize fitness?
+
+        Returns:
+            Whether this is a maximising fitness function
+        """
+        return self._maximize
+
+    @maximize.setter
+    def maximize(self, new_value: bool) -> None:
+        """Sets whether this is a maximising fitness function.
+
+        Args:
+            new_value: The new value
+        """
+        self._maximize = new_value
+
+
+class RandomSelection(SelectionFunction[T]):
+    """Random selection."""
+
+    def get_index(self, population: list[T]) -> int:
+        """Provides an index in the population that is chosen randomly.
+
+        Args:
+            population: A list of chromosomes to select from
+
+        Returns:
+            The index that should be used for selection
+        """
+        return randomness.next_int(lower_bound=0, upper_bound=len(population))
+
+    def maximize(self):
+        """Random selection does not have a maximize property."""
+        raise NotImplementedError("Random selection does not have a maximize property")
+
+
+class RankSelection(SelectionFunction[T]):
+    """Rank selection."""
+
+    def __init__(self, bias: float | None = None) -> None:
+        """Create a new rank selection function.
+
+        Args:
+            bias: The bias to use for rank selection. If None, the default value from the
+                configuration is used.
+        """
+        super().__init__()
+        self.bias = config.configuration.search_algorithm.rank_bias if bias is None else bias
+
+    def get_index(self, population: list[T]) -> int:
+        """Provides an index in the population that is chosen by rank selection.
+
+        Make sure that the population is sorted. The fittest chromosomes have to come
+        first.
+
+        Args:
+            population: A list of chromosomes to select from
+
+        Returns:
+            The index that should be used for selection
+        """
+        random_value = randomness.next_float()
+        bias = self.bias
+        return int(
+            len(population)
+            * ((bias - sqrt(bias**2 - (4.0 * (bias - 1.0) * random_value))) / 2.0 / (bias - 1.0))
+        )
+
+
+class TournamentSelection(SelectionFunction[T]):
+    """Tournament selection."""
+
+    def get_index(self, population: list[T]) -> int:  # noqa: D102
+        new_num = randomness.next_int(lower_bound=0, upper_bound=len(population))
+        winner = new_num
+
+        tournament_round = 0
+
+        while tournament_round < config.configuration.search_algorithm.tournament_size - 1:
+            new_num = randomness.next_int(lower_bound=0, upper_bound=len(population))
+            selected = population[new_num]
+
+            if (
+                self._maximize and selected.get_fitness() > population[winner].get_fitness()
+            ) or selected.get_fitness() < population[winner].get_fitness():
+                winner = new_num
+
+            tournament_round += 1
+
+        return winner

@@ -1,0 +1,229 @@
+#  This file is part of Pynguin.
+#
+#  SPDX-FileCopyrightText: 2019–2026 Pynguin Contributors
+#
+#  SPDX-License-Identifier: MIT
+#
+"""Provides a basic API to communicate with LLMs."""
+
+from __future__ import annotations
+
+import abc
+import enum
+import logging
+import re
+import typing
+
+from pynguin.utils.openai_key_resolver import (
+    get_llm_url,
+    get_model_name,
+    require_api_key,
+)
+
+if typing.TYPE_CHECKING:
+    from collections.abc import Iterable
+
+
+try:
+    import openai
+    from openai.types.chat import (
+        ChatCompletionAssistantMessageParam,
+        ChatCompletionDeveloperMessageParam,
+        ChatCompletionFunctionMessageParam,
+        ChatCompletionSystemMessageParam,
+        ChatCompletionToolMessageParam,
+        ChatCompletionUserMessageParam,
+    )
+
+    if typing.TYPE_CHECKING:
+        from pydantic import SecretStr
+
+    OPENAI_AVAILABLE = True
+except ImportError:
+    OPENAI_AVAILABLE = False
+
+try:
+    import ollama
+
+    OLLAMA_AVAILABLE = True
+except ImportError:
+    OLLAMA_AVAILABLE = False
+
+
+LOGGER = logging.getLogger(__name__)
+
+from pynguin.configuration import LLMProvider
+
+
+class LLM(abc.ABC):
+    """An abstract interface for LLM communications."""
+
+    def __init__(
+        self, api_key: SecretStr, temperature: float, system_prompt: str
+    ) -> None:
+        """Initialises the LLM communication interface.
+
+        Args:
+            api_key: the API key to authenticate with the LLM
+            temperature: the temperature setting for the LLM
+            system_prompt: the system prompt for the LLM
+        """
+        self._api_key = api_key
+        self._temperature = temperature
+        self._system_prompt = system_prompt
+
+    @abc.abstractmethod
+    def chat(self, prompt: str, system_prompt: str | None = None) -> str | None:
+        """Sends a message to the LLM and returns its raw answer.
+
+        Args:
+            prompt: the (user) prompt send to the LLM
+            system_prompt: the system prompt send to the LLM, if empty use the one from the
+                           constructor of this class.
+
+        Returns:
+            The raw answer from the LLM or None
+        """
+
+    @classmethod
+    def create(cls, provider: LLMProvider) -> LLM:
+        """Creates the LLM communication interface based on the given provider.
+
+        Args:
+            provider: the provider of the LLM
+
+        Returns:
+            The concrete LLM communication interface
+        """
+        match provider:
+            case LLMProvider.OPENAI:
+                if not OPENAI_AVAILABLE:
+                    raise ValueError(
+                        "OpenAI API library is not available. You can install it with poetry "
+                        "install --with openai."
+                    )
+                return OpenAI()
+            case LLMProvider.OLLAMA:
+                if not OLLAMA_AVAILABLE:
+                    raise ValueError(
+                        "Ollama API library is not available. You can install it with poetry "
+                        "install --with ollama."
+                    )
+                return Ollama()
+            case _:
+                raise NotImplementedError(f"Unknown provider {provider}")
+
+
+def extract_code(llm_response: str) -> str:
+    """Takes the response from the LLM and attempts to extract the answer.
+
+    Args:
+        llm_response: the response from the LLM
+
+    Returns:
+        the extracted answer, i.e., the extracted pytest code
+    """
+    md_source_block_pattern = r"^```(?:\w+)?\s*\n(.*?)(?=^```)```"
+    result = re.findall(md_source_block_pattern, llm_response, re.DOTALL | re.MULTILINE)
+    return "\n".join(result)
+
+
+if OPENAI_AVAILABLE:
+    OPENAI_SYSTEM_PROMPT = """You are a senior level Python developer with a focus on testing
+    with the pytest framework. Provide the generated tests in the style of the pytest framework.
+    Provide the generated tests inside a Markdown-style code block."""
+
+    MessageTypes: typing.TypeAlias = (
+        ChatCompletionDeveloperMessageParam
+        | ChatCompletionSystemMessageParam
+        | ChatCompletionUserMessageParam
+        | ChatCompletionAssistantMessageParam
+        | ChatCompletionToolMessageParam
+        | ChatCompletionFunctionMessageParam
+    )
+
+    class OpenAI(LLM):
+        """An interface for communication with OpenAI."""
+
+        def __init__(  # noqa: D107
+            self,
+            api_key: SecretStr | None = None,
+            temperature: float = 0.2,
+            system_prompt: str = OPENAI_SYSTEM_PROMPT,
+            model: str | None = None,
+        ) -> None:
+            if api_key is None or not api_key.get_secret_value():
+                api_key = require_api_key()
+            super().__init__(api_key, temperature, system_prompt)
+            llm_url = get_llm_url()
+            kwargs: dict = {"api_key": api_key.get_secret_value()}
+            if llm_url:
+                kwargs["base_url"] = llm_url
+            self.__client = openai.OpenAI(**kwargs)
+            self.__model = model or get_model_name()
+
+        def chat(
+            self, prompt: str, system_prompt: str | None = None
+        ) -> str | None:  # noqa: D102
+            if not system_prompt:
+                system_prompt = self._system_prompt
+
+            messages: Iterable[MessageTypes] = [
+                ChatCompletionSystemMessageParam(content=system_prompt, role="system"),
+                ChatCompletionUserMessageParam(content=prompt, role="user"),
+            ]
+            try:
+                response = self.__client.chat.completions.create(
+                    messages=messages,
+                    model=self.__model,
+                )
+                return response.choices[0].message.content
+            except openai.OpenAIError as e:
+                LOGGER.exception(e)
+            return None
+
+
+if OLLAMA_AVAILABLE:
+    OLLAMA_SYSTEM_PROMPT = """You are a senior level Python developer with a focus on testing
+    with the pytest framework. Provide the generated tests in the style of the pytest framework.
+    Provide the generated tests inside a Markdown-style code block."""
+
+    class Ollama(LLM):
+        """An interface for communication with Ollama."""
+
+        def __init__(  # noqa: D107
+            self,
+            api_key: SecretStr | None = None,
+            temperature: float = 0.2,
+            system_prompt: str = OLLAMA_SYSTEM_PROMPT,
+            model: str = "qwen2.5-coder:3b",  # TODO : set default model
+        ) -> None:
+            super().__init__(api_key, temperature, system_prompt)
+            if api_key is None:
+                self.__client = ollama.Client()
+            else:
+                self.__client = ollama.Client(
+                    host="https://ollama.com",
+                    headers={"Authorization": "Bearer " + api_key},
+                )
+            self.__model = model
+
+        def chat(
+            self, prompt: str, system_prompt: str | None = None
+        ) -> str | None:  # noqa: D102
+            if not system_prompt:
+                system_prompt = self._system_prompt
+
+            messages = [
+                {"content": system_prompt, "role": "developer"},
+                {"content": prompt, "role": "user"},
+            ]
+            try:
+                response: ollama.ChatResponse = self.__client.chat(
+                    messages=messages,
+                    model=self.__model,
+                )
+                return response.message.content
+            except ollama.ResponseError as e:
+                LOGGER.exception(e)
+            return None

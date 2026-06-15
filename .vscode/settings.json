@@ -1,0 +1,9 @@
+{
+    "python.analysis.extraPaths": [
+        "./pynguin/src"
+    ],
+    "python-envs.defaultEnvManager": "ms-python.python:system",
+    "conventionalCommits.scopes": [
+        "LLM"
+    ]
+}

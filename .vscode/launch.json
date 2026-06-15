@@ -1,0 +1,32 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug Pynguin with Arguments",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "pynguin",
+            "console": "integratedTerminal",
+            "args": "--module_name tab --project_path .. --output_path .. -v --create_coverage_report True --algorithm LLMOSA --provider OLLAMA --model_name qwen2.5-coder:1.5b --maximum_iterations 10 --call_llm_on_stall_detection True --call_llm_for_uncovered_targets True --max_plateau_len 5",
+            "justMyCode": true,
+            "env": {"PYNGUIN_DANGER_AWARE" : "1"},
+            "cwd": "${workspaceFolder}/pynguin",
+            "python": "/home/theo/.cache/pypoetry/virtualenvs/pynguin-u_gZn74M-py3.10/bin/python",
+        },
+                {
+            "name": "Profile Pynguin with Arguments",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "pyinstrument -m pynguin",
+            "console": "integratedTerminal",
+            "args": "--module_name tab --project_path .. --output_path .. -v --create_coverage_report True --algorithm LLMOSA --provider OLLAMA --model_name qwen2.5-coder:1.5b --maximum_iterations 10 --call_llm_on_stall_detection True --call_llm_for_uncovered_targets True --max_plateau_len 5",
+            "justMyCode": true,
+            "env": {"PYNGUIN_DANGER_AWARE" : "1"},
+            "cwd": "${workspaceFolder}/pynguin",
+            "python": "/home/theo/.cache/pypoetry/virtualenvs/pynguin-u_gZn74M-py3.10/bin/python",
+        }
+    ]
+}
