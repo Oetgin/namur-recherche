@@ -80,10 +80,8 @@ class UncoveredTargetsPrompt(Prompt):
             f"Module path: `{self.module_path}`\n"
             f"Module source code: `{self.module_code}`\n"
             f"You answer will be parsed for mutations, so here are the guidelines you need to follow :\n"
-            f"- Answer in a code block using simple functions, one for each case, with names starting with test_..., and testing every existing code path that the SBST algorithm could have trouble finding through mutation only.\n"
-            f"- DO NOT USE PARAMETERS OR HELPER FUNCTIONS. In the test functions, everything used should be created in the function, and follow the signature `def test_...():`, with EMPTY parameters.\n"
-            f"- Create either assertion tests to test return values or behaviour, or exception tests to check that an exception is raised. If the exception is expected (explicitly raised), use `with pytest.raises(ExampleException):`, else use the `@pytest.mark.xfail(strict=True)` decorator.\n"
-            f"- Do not use any other pytest feature (or any other lib), as that will make the parsing fail.\n"
+            f"- Answer in a code block only using, one function for each test case, with NO ARGUMENTS, NO HELPER FUNCTIONS AND NO CLASSES.\n"
+            f"- If needed, instantiate vars in the body of the test func or use pytest.parametrize, but do not use any pytest feature (or any other lib), as that will make the parsing fail.\n"
             f"- Do not rewrite the SUT's code in the tests. If you want for example to call a function or instanciante a class, import it.\n"
             f"- Don't explain what you do, just answer in simple, concise assertion tests.\n"
             f"\nHere are some examples; *NEVER  DO* :\n"
@@ -95,4 +93,5 @@ class UncoveredTargetsPrompt(Prompt):
             f"def test_feat1():\n"
             f"  var0 = func()\n"
             f"  assert ...\n"
+            f"\n\nREMEMBER : NO ARGUMENTS IN YOUR TEST FUNCTIONS"
         )
