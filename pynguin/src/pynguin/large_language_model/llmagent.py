@@ -213,7 +213,6 @@ class LLMAgent:
                     raise ImportError(
                         "Can't import Ollama provider. Please make sure the ollama package is installed."  # noqa: E501
                     )
-                # TODO (Oetgin) : Handle non empty API key for cloud models
                 self._client = Ollama()  # pyright: ignore[reportPossiblyUnboundVariable]
             case _:
                 raise NotImplementedError(f"Unknown provider {self._provider}")

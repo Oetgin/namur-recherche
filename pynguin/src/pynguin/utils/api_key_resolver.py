@@ -6,8 +6,6 @@
 #
 """Utilities for resolving API keys."""
 
-# TODO (Oetgin) : Adapt, test and rename for Ollama
-
 from __future__ import annotations
 
 import logging
