@@ -185,7 +185,7 @@ class LLMInference(InferenceProvider):
 
     # ---- LLM I/O (parallel) ----
     def _send_prompt(self, prompt: str) -> str:
-        return self._model.chat(prompt) or ""
+        return self._model.chat(prompt)[0] or ""
 
     def _send_prompts(
         self, prompts: Mapping[Callable[..., Any], str]

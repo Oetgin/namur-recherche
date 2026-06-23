@@ -16,22 +16,18 @@ from pathlib import Path
 from typing import TYPE_CHECKING, cast
 
 from pynguin.large_language_model.prompts.localsearchprompt import LocalSearchPrompt
+from pynguin.utils.llm import LLM
 from pynguin.utils.report import LineAnnotation
 
 try:
-    import openai
-    from openai.types.chat import (
-        ChatCompletionMessageParam,
-        ChatCompletionSystemMessageParam,
-        ChatCompletionUserMessageParam,
-    )
+    from pynguin.utils.llm import OpenAI
 
     OPENAI_AVAILABLE = True
 except ImportError:
     OPENAI_AVAILABLE = False
 
 try:
-    import ollama
+    from pynguin.utils.llm import Ollama
 
     OLLAMA_AVAILABLE = True
 
@@ -54,13 +50,11 @@ from pynguin.large_language_model.prompts.testcasegenerationprompt import (
 from pynguin.large_language_model.prompts.uncoveredtargetsprompt import (
     UncoveredTargetsPrompt,
 )
+from pynguin.utils.api_key_resolver import (
+    get_model_name,
+)
 from pynguin.utils.generic.genericaccessibleobject import (
     GenericCallableAccessibleObject,
-)
-from pynguin.utils.openai_key_resolver import (
-    get_llm_url,
-    get_model_name,
-    require_api_key,
 )
 from pynguin.utils.statistics.runtimevariable import RuntimeVariable
 
@@ -85,9 +79,7 @@ def save_prompt_info_to_file(prompt_message: str, full_response: str):
         output_file = output_dir / "prompt_info.txt"
 
         with output_file.open(mode="a", encoding="utf-8") as file:
-            timestamp = datetime.datetime.now(datetime.timezone.utc).strftime(
-                "%Y-%m-%d %H:%M:%S"
-            )
+            timestamp = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
             file.write(f"==============\nDate and Time: {timestamp}\n==============\n")
             file.write(f"Prompt:\n{prompt_message}\n")
             file.write("==============\nFull Response\n==============\n")
@@ -138,9 +130,7 @@ def get_part_of_source_code(name: str) -> str:
         return ""
     source_lines, start_line = result
 
-    return "\n".join(
-        f"{start_line + i:4d}: {line.rstrip()}" for i, line in enumerate(source_lines)
-    )
+    return "\n".join(f"{start_line + i:4d}: {line.rstrip()}" for i, line in enumerate(source_lines))
 
 
 def shorten_line_annotations(
@@ -163,8 +153,7 @@ def shorten_line_annotations(
     return [
         line_annotation
         for line_annotation in line_annotations
-        if start_line <= line_annotation.line_no < end_line
-        and line_annotation.branches.covered > 0
+        if start_line <= line_annotation.line_no < end_line and line_annotation.branches.covered > 0
     ]
 
 
@@ -194,7 +183,7 @@ def _find_lines(name: str) -> tuple[list[str], int] | None:
 
 
 class LLMAgent:
-    """A class to interact with the configured provider's language model for generating unit tests."""
+    """A class to interact with the configured provider's LLM for generating unit tests."""
 
     def __init__(self):
         """Initializes the LLMAgent with configuration settings and cache."""
@@ -211,25 +200,21 @@ class LLMAgent:
         if config.configuration.large_language_model.enable_response_caching:
             self.cache = Cache()
 
+        self._client: LLM
         match self._provider:
             case config.LLMProvider.OPENAI:
                 if not OPENAI_AVAILABLE:
                     raise ImportError(
-                        "Can't import OpenAI provider. Please make sure the openai package is installed."
+                        "Can't import OpenAI provider. Please make sure the openai package is installed."  # noqa: E501
                     )
-                api_key = require_api_key()
-                llm_url = get_llm_url()
-                kwargs: dict = {"api_key": api_key.get_secret_value()}
-                if llm_url:
-                    kwargs["base_url"] = llm_url
-                self._client = openai.OpenAI(**kwargs)
+                self._client = OpenAI()  # pyright: ignore[reportPossiblyUnboundVariable]
             case config.LLMProvider.OLLAMA:
                 if not OLLAMA_AVAILABLE:
                     raise ImportError(
-                        "Can't import Ollama provider. Please make sure the ollama package is installed."
+                        "Can't import Ollama provider. Please make sure the ollama package is installed."  # noqa: E501
                     )
-                # TODO handle non empty API key for cloud models
-                self._client = ollama.Client()
+                # TODO (Oetgin) : Handle non empty API key for cloud models
+                self._client = Ollama()  # pyright: ignore[reportPossiblyUnboundVariable]
             case _:
                 raise NotImplementedError(f"Unknown provider {self._provider}")
 
@@ -308,87 +293,31 @@ class LLMAgent:
         start_time = time.time_ns()
         self._llm_calls_counter += 1
 
-        # FIXME : More elegant solution probably possible
-        match self._provider:
-            case config.LLMProvider.OPENAI:
-                messages: list[ChatCompletionMessageParam] = [
-                    ChatCompletionSystemMessageParam(
-                        role="system", content=prompt.system_message
-                    ),
-                    ChatCompletionUserMessageParam(role="user", content=prompt_text),
-                ]
-
-                try:
-                    response = self._client.chat.completions.create(
-                        model=self._model_name,
-                        messages=messages,
-                        temperature=self._temperature,
-                    )
-                    if response.usage is not None:
-                        self._llm_input_tokens += response.usage.prompt_tokens
-                        self._llm_output_tokens += response.usage.completion_tokens
-                    response_text = response.choices[0].message.content
-
-                    if (
-                        config.configuration.large_language_model.enable_response_caching
-                        and response_text is not None
-                    ):
-                        self.cache.set(prompt_text, response_text)
-
-                    if response_text:
-                        save_prompt_info_to_file(prompt_text, response_text)
-                    return response_text
-
-                except openai.OpenAIError as e:
-                    _logger.error(
-                        "An error occurred while querying the OpenAI API. Model: %s, Prompt: %s, Error: %s",
-                        self._model_name,
-                        prompt_text,
-                        e,
-                    )
-                finally:
-                    self._llm_calls_timer += time.time_ns() - start_time
-                    self._log_and_track_llm_stats()
-
-            case config.LLMProvider.OLLAMA:
-                messages = [
-                    {"role": "system", "content": prompt.system_message},
-                    {"role": "user", "content": prompt_text},
-                ]
-
-                try:
-                    response: ollama.ChatResponse = self._client.chat(
-                        model=self._model_name,
-                        messages=messages,
-                    )
-
-                    if response is not None:
-                        self._llm_input_tokens += response.prompt_eval_count
-                        self._llm_output_tokens += response.eval_count
-                    response_text = response.message.content
-
-                    if (
-                        config.configuration.large_language_model.enable_response_caching
-                        and response_text is not None
-                    ):
-                        self.cache.set(prompt_text, response_text)
-
-                    if response_text:
-                        save_prompt_info_to_file(prompt_text, response_text)
-
-                    _logger.info("LLM response : %s", response_text)
-                    return response_text
-
-                except ollama.ResponseError as e:
-                    _logger.error(
-                        "An error occurred while querying the Ollama API. Model: %s, Prompt: %s, Error: %s",
-                        self._model_name,
-                        prompt_text,
-                        e,
-                    )
-                finally:
-                    self._llm_calls_timer += time.time_ns() - start_time
-                    self._log_and_track_llm_stats()
+        try:
+            response, usage = self._client.chat(
+                prompt=prompt_text, system_prompt=prompt.system_message
+            )
+            if usage:
+                self._llm_input_tokens += usage["prompt_tokens"]
+                self._llm_output_tokens += usage["completion_tokens"]
+            if (
+                config.configuration.large_language_model.enable_response_caching
+                and response is not None
+            ):
+                self.cache.set(prompt_text, response)
+            if response:
+                save_prompt_info_to_file(prompt_text, response)
+            return response
+        except self._client.response_error as e:
+            _logger.error(
+                "An error occurred while querying the LLM API. Model: %s, Prompt: %s, Error: %s",
+                self._model_name,
+                prompt_text,
+                e,
+            )
+        finally:
+            self._llm_calls_timer += time.time_ns() - start_time
+            self._log_and_track_llm_stats()
 
         return None
 
@@ -470,24 +399,16 @@ class LLMAgent:
         )
         _logger.info("Total LLM call time is %s seconds", self.llm_calls_timer / 1e9)
 
-        stat.track_output_variable(
-            RuntimeVariable.TotalLLMCalls, self.llm_calls_counter
-        )
+        stat.track_output_variable(RuntimeVariable.TotalLLMCalls, self.llm_calls_counter)
         stat.track_output_variable(RuntimeVariable.LLMQueryTime, self.llm_calls_timer)
-        stat.track_output_variable(
-            RuntimeVariable.TotalLLMOutputTokens, self.llm_output_tokens
-        )
-        stat.track_output_variable(
-            RuntimeVariable.TotalLLMInputTokens, self.llm_input_tokens
-        )
+        stat.track_output_variable(RuntimeVariable.TotalLLMOutputTokens, self.llm_output_tokens)
+        stat.track_output_variable(RuntimeVariable.TotalLLMInputTokens, self.llm_input_tokens)
         stat.track_output_variable(
             RuntimeVariable.TotalCodelessLLMResponses,
             self.llm_calls_with_no_python_code,
         )
 
-    def generate_assertions_for_test_case(
-        self, test_case_source_code: str
-    ) -> str | None:
+    def generate_assertions_for_test_case(self, test_case_source_code: str) -> str | None:
         """Generates assertions for a given test case source code.
 
         Args:

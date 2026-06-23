@@ -4,7 +4,9 @@
 #
 #  SPDX-License-Identifier: MIT
 #
-"""Utilities for resolving OpenAI API keys."""
+"""Utilities for resolving API keys."""
+
+# TODO (Oetgin) : Adapt, test and rename for Ollama
 
 from __future__ import annotations
 
@@ -32,13 +34,20 @@ except ImportError:
 _logger = logging.getLogger(__name__)
 
 
-def get_api_key() -> SecretStr | None:
-    """Get OpenAI API key with clear preference order.
+def get_api_key(provider: config.LLMProvider | None = None) -> SecretStr | None:
+    """Get LLM API key with clear preference order.
 
     Preference order:
     1) configuration.large_language_model.api_key (if non-empty)
-    2) PYNGUIN_OPENAI_API_KEY environment variable
-    3) OPENAI_API_KEY environment variable
+    2) PYNGUIN_[PROVIDER]_API_KEY environment variable
+    3) [PROVIDER]_API_KEY environment variable
+
+    With [PROVIDER] the configured provider (see :class:`pynguin.configuration.LLMProvider`
+    for available providers)
+
+    Args:
+        provider: Controls which provider to search the API key for.
+            If None, the provider given in the configuration, otherwise the given provider.
 
     Returns:
         SecretStr with the API key or None if not found.
@@ -53,8 +62,16 @@ def get_api_key() -> SecretStr | None:
     if DOTENV_AVAILABLE:
         load_dotenv()
 
+    # Get provider
+    if provider is None:
+        provider = config.LLMConfiguration.provider
+
     # Check environment variables
-    for var in ("PYNGUIN_OPENAI_API_KEY", "OPENAI_API_KEY", "LLM_API_KEY"):
+    for var in (
+        f"PYNGUIN_{provider.upper()}_API_KEY",
+        f"{provider.upper()}_API_KEY",
+        "LLM_API_KEY",
+    ):
         value = os.environ.get(var, "")
         if value and value.strip():
             return SecretStr(value.strip())
@@ -63,7 +80,7 @@ def get_api_key() -> SecretStr | None:
 
 
 def require_api_key() -> SecretStr:
-    """Get OpenAI API key or raise ValueError if not found.
+    """Get LLM API key or raise ValueError if not found.
 
     Returns:
         SecretStr with the API key.
@@ -71,14 +88,16 @@ def require_api_key() -> SecretStr:
     Raises:
         ValueError: If the API key is not found in config or environment.
     """
+    provider = config.LLMConfiguration.provider
+
     api_key = get_api_key()
     if api_key is None or not api_key.get_secret_value():
-        _logger.error("OpenAI API key not found in configuration or environment.")
+        _logger.error("LLM API key not found in configuration or environment.")
         raise ValueError(
-            "OpenAI API key not found. Set it via:\n"
+            "LLM API key not found. Set it via:\n"
             "  - configuration.large_language_model.api_key, or\n"
-            "  - PYNGUIN_OPENAI_API_KEY environment variable, or\n"
-            "  - OPENAI_API_KEY environment variable"
+            f"  - PYNGUIN_{provider.upper()}_API_KEY environment variable, or\n"
+            f"  - {provider.upper()}_API_KEY environment variable"
         )
     return api_key
 
@@ -89,10 +108,10 @@ def get_llm_url() -> str:
     Preference order:
     1) configuration.large_language_model.llm_url (if non-empty)
     2) PYNGUIN_LLM_BASE_URL environment variable
-    3) Returns "" (empty = use OpenAI default)
+    3) Returns "" (empty = use default)
 
     Returns:
-        The base URL string, or empty string for OpenAI default.
+        The base URL string, or empty string for default.
     """
     cfg_url = getattr(config.configuration.large_language_model, "llm_url", "") or ""
     cfg_url = cfg_url.strip()
@@ -117,9 +136,7 @@ def get_model_name() -> str:
     Returns:
         The model name string.
     """
-    cfg_model = (
-        getattr(config.configuration.large_language_model, "model_name", "") or ""
-    )
+    cfg_model = getattr(config.configuration.large_language_model, "model_name", "") or ""
     cfg_model = cfg_model.strip()
     if cfg_model:
         return cfg_model
@@ -134,10 +151,10 @@ def get_model_name() -> str:
     return "gpt-4o-mini"
 
 
-def is_api_key_present() -> bool:
-    """Check if the OpenAI API key is available.
+def is_api_key_present(provider: config.LLMProvider | None = None) -> bool:
+    """Check if the LLM API key is available.
 
     Returns:
         True if the API key is present and not empty, False otherwise.
     """
-    return get_api_key() is not None
+    return get_api_key(provider) is not None

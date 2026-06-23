@@ -56,7 +56,11 @@ class LLMOSAAlgorithm(MOSAAlgorithm):
             self._archive.update(self._population)
 
             coverage_after = self.create_test_suite(self._archive.solutions).get_coverage()
-            self._logger.info("Coverage after LLM call: %5f", coverage_after)
+            self._logger.info(
+                "Coverage after LLM call: %5f (+%5f)",
+                coverage_after,
+                (coverage_after - coverage_before),
+            )
             stat.track_output_variable(RuntimeVariable.CoverageAfterLLMCall, coverage_after)
 
     def generate_tests(self) -> tsc.TestSuiteChromosome:  # noqa: D102
@@ -195,7 +199,7 @@ class LLMOSAAlgorithm(MOSAAlgorithm):
         population: list[tcc.TestCaseChromosome] = []
         for _ in range(config.configuration.search_algorithm.population):
             chromosome = (
-                self._chromosome_factory.test_case_chromosome_factory.get_chromosome()  # type:ignore[attr-defined]
+                self._chromosome_factory.test_case_chromosome_factory.get_chromosome()  # type: ignore[attr-defined]
             )
             population.append(chromosome)
         return population
@@ -204,4 +208,4 @@ class LLMOSAAlgorithm(MOSAAlgorithm):
         self,
         factory: cf.ChromosomeFactory | None = None,
     ) -> list[tcc.TestCaseChromosome]:
-        return super()._breed_next_generation(self._chromosome_factory.test_case_chromosome_factory)  # type:ignore[attr-defined]
+        return super()._breed_next_generation(self._chromosome_factory.test_case_chromosome_factory)  # type: ignore[attr-defined]

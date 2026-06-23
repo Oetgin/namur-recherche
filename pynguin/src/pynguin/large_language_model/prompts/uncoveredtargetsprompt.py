@@ -6,6 +6,8 @@
 #
 """Provides class prompt for generating tests for a module."""
 
+import textwrap
+
 from pynguin.large_language_model.prompts.prompt import Prompt
 from pynguin.utils.generic.genericaccessibleobject import (
     GenericCallableAccessibleObject,
@@ -72,26 +74,29 @@ class UncoveredTargetsPrompt(Prompt):
         callables_list = self.build_callables_prompt_section()
         callables_section = "\n".join(callables_list)
 
-        return (
-            f"You are writing tests to be used as seed for a SBST algorithm. Your goal is to improve as much as possible the coverage of the tests.\n"
-            f"Write unit tests for the following callables that "
-            f"Pynguin failed to cover:\n"
-            f"{callables_section}\n"
-            f"Module path: `{self.module_path}`\n"
-            f"Module source code: `{self.module_code}`\n"
-            f"You answer will be parsed for mutations, so here are the guidelines you need to follow :\n"
-            f"- Answer in a code block only using, one function for each test case, with NO ARGUMENTS, NO HELPER FUNCTIONS AND NO CLASSES.\n"
-            f"- If needed, instantiate vars in the body of the test func or use pytest.parametrize, but do not use any pytest feature (or any other lib), as that will make the parsing fail.\n"
-            f"- Do not rewrite the SUT's code in the tests. If you want for example to call a function or instanciante a class, import it.\n"
-            f"- Don't explain what you do, just answer in simple, concise assertion tests.\n"
-            f"\nHere are some examples; *NEVER  DO* :\n"
-            f"def func_all_tests(param):\n"
-            f"  var0 = param\n"
-            f"  ...\n"
-            f"\n*INSTEAD DO* :\n"
-            f"from module_to_test import func\n"
-            f"def test_feat1():\n"
-            f"  var0 = func()\n"
-            f"  assert ...\n"
-            f"\n\nREMEMBER : NO ARGUMENTS IN YOUR TEST FUNCTIONS"
-        )
+        return textwrap.dedent(f"""
+            You are writing tests to be used as seed for a SBST algorithm. Your goal is to improve as much as possible the coverage of the tests.
+            Write unit tests for the following callables that Pynguin failed to cover:
+            {callables_section}
+            Module path: `{self.module_path}`
+            Module source code: `{self.module_code}`
+            You answer will be parsed for mutations, so here are the guidelines you need to follow :
+            - Answer in a code block only using; one function for each test case, with NO ARGUMENTS, NO HELPER FUNCTIONS AND NO CLASSES.
+            - If needed, instantiate vars in the body of the test func or use pytest.parametrize, but DO NOT USE ANY OTHER PYTEST FEATURE (e.g. DO NOT USE FIXTURES), as that will make the parsing fail.
+            - Do not rewrite the SUT's code in the tests. If you want for example to call a function or instanciante a class, import it.
+            - Don't explain what you do, just answer in simple, concise assertion tests, split in small functions, following the Arrange, Act, Assert pattern.
+
+            Here are some examples; *NEVER  DO* :
+            def func_all_tests(param):
+              var0 = param
+              ...
+
+            *INSTEAD DO* :
+            from module_to_test import func
+            def test_feat1():
+              var0 = func()
+              assert ...
+
+
+            REMEMBER : NO ARGUMENTS IN YOUR TEST FUNCTIONS"
+            """)  # noqa: E501

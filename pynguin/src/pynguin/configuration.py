@@ -303,9 +303,7 @@ class Minimization:
     """Strategy to apply for minimizing test cases to remove redundant statements
     while preserving fitness."""
 
-    test_case_minimization_direction: MinimizationDirection = (
-        MinimizationDirection.BACKWARD
-    )
+    test_case_minimization_direction: MinimizationDirection = MinimizationDirection.BACKWARD
     """Direction to apply for minimizing test cases."""
 
 
@@ -826,7 +824,7 @@ class LLMConfiguration:
     """The provider for all LLM-based operations."""
 
     api_key: str = ""
-    """The api key to call the LLM with. Make sure to use the key associated to the given provider."""
+    """The api key to call the LLM with. Use the key associated to the given provider."""
 
     model_name: str = "gpt-4o-mini"
     """The LLM to use for completions."""
@@ -967,14 +965,10 @@ class Configuration:
     )
     """Statistic Output configuration."""
 
-    stopping: StoppingConfiguration = dataclasses.field(
-        default_factory=StoppingConfiguration
-    )
+    stopping: StoppingConfiguration = dataclasses.field(default_factory=StoppingConfiguration)
     """Stopping configuration."""
 
-    large_language_model: LLMConfiguration = dataclasses.field(
-        default_factory=LLMConfiguration
-    )
+    large_language_model: LLMConfiguration = dataclasses.field(default_factory=LLMConfiguration)
     """Large Language Model(LLM) configuration."""
 
     string_statement: StringStatementConfiguration = dataclasses.field(
@@ -982,9 +976,7 @@ class Configuration:
     )
     """String statement configuration."""
 
-    seeding: SeedingConfiguration = dataclasses.field(
-        default_factory=SeedingConfiguration
-    )
+    seeding: SeedingConfiguration = dataclasses.field(default_factory=SeedingConfiguration)
     """Seeding configuration."""
 
     type_inference: TypeInferenceConfiguration = dataclasses.field(
@@ -992,9 +984,7 @@ class Configuration:
     )
     """Type inference configuration."""
 
-    pynguinml: PynguinMLConfiguration = dataclasses.field(
-        default_factory=PynguinMLConfiguration
-    )
+    pynguinml: PynguinMLConfiguration = dataclasses.field(default_factory=PynguinMLConfiguration)
     """PynguinML configuration."""
 
     test_creation: TestCreationConfiguration = dataclasses.field(
@@ -1017,9 +1007,7 @@ class Configuration:
     random: RandomConfiguration = dataclasses.field(default_factory=RandomConfiguration)
     """Configuration used for the RANDOM algorithm."""
 
-    to_cover: ToCoverConfiguration = dataclasses.field(
-        default_factory=ToCoverConfiguration
-    )
+    to_cover: ToCoverConfiguration = dataclasses.field(default_factory=ToCoverConfiguration)
     """Configuration of which code elements are included or excluded as coverage goals."""
 
     ignore_modules: list[str] = dataclasses.field(default_factory=list)
