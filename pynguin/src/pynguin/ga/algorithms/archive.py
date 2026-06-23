@@ -93,9 +93,7 @@ class CoverageArchive(Archive):
 
     _logger = logging.getLogger(__name__)
 
-    def __init__(  # noqa: D107
-        self, objectives: OrderedSet[ff.TestCaseFitnessFunction]
-    ) -> None:
+    def __init__(self, objectives: OrderedSet[ff.TestCaseFitnessFunction]) -> None:  # noqa: D107
         super().__init__()
         self._covered: dict[ff.TestCaseFitnessFunction, tcc.TestCaseChromosome] = {}
         self._uncovered = OrderedSet(objectives)

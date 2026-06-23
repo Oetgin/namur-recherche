@@ -578,9 +578,7 @@ class AssignmentStatement(Statement):
             refs.add(l_var)
         return refs
 
-    def replace(  # noqa: D102
-        self, old: vr.VariableReference, new: vr.VariableReference
-    ) -> None:
+    def replace(self, old: vr.VariableReference, new: vr.VariableReference) -> None:  # noqa: D102
         if self._lhs == old:
             self._lhs = new
         else:
@@ -588,9 +586,7 @@ class AssignmentStatement(Statement):
         if self._rhs == old:
             self._rhs = new
 
-    def structural_hash(  # noqa: D102
-        self, memo: dict[vr.VariableReference, int]
-    ) -> int:
+    def structural_hash(self, memo: dict[vr.VariableReference, int]) -> int:  # noqa: D102
         return hash((self._lhs.structural_hash(memo), self._rhs.structural_hash(memo)))
 
     def structural_eq(  # noqa: D102
@@ -905,18 +901,20 @@ class NonDictCollection(CollectionStatement[vr.VariableReference], abc.ABC):
 
     def _replacement_supplier(self, element: vr.VariableReference) -> vr.VariableReference:
         # TODO(fk) what if the current type is not correct?
-        return randomness.choice([
-            *self.test_case.get_objects(element.type, self.get_position()),
-            element,
-        ])
+        return randomness.choice(
+            [
+                *self.test_case.get_objects(element.type, self.get_position()),
+                element,
+            ]
+        )
 
-    def structural_hash(  # noqa: D102
-        self, memo: dict[vr.VariableReference, int]
-    ) -> int:
-        return hash((
-            self.ret_val.structural_hash(memo),
-            frozenset((v.structural_hash(memo)) for v in self._elements),
-        ))
+    def structural_hash(self, memo: dict[vr.VariableReference, int]) -> int:  # noqa: D102
+        return hash(
+            (
+                self.ret_val.structural_hash(memo),
+                frozenset((v.structural_hash(memo)) for v in self._elements),
+            )
+        )
 
     def structural_eq(  # noqa: D102
         self, other: Any, memo: dict[vr.VariableReference, vr.VariableReference]
@@ -946,9 +944,7 @@ class ListStatement(NonDictCollection):
         references.update(self._elements)
         return references
 
-    def replace(  # noqa: D102
-        self, old: vr.VariableReference, new: vr.VariableReference
-    ) -> None:
+    def replace(self, old: vr.VariableReference, new: vr.VariableReference) -> None:  # noqa: D102
         if self.ret_val == old:
             self.ret_val = new
         self._elements = [new if arg == old else arg for arg in self._elements]
@@ -977,9 +973,7 @@ class SetStatement(NonDictCollection):
         references.update(self._elements)
         return references
 
-    def replace(  # noqa: D102
-        self, old: vr.VariableReference, new: vr.VariableReference
-    ) -> None:
+    def replace(self, old: vr.VariableReference, new: vr.VariableReference) -> None:  # noqa: D102
         if self.ret_val == old:
             self.ret_val = new
         self._elements = [new if arg == old else arg for arg in self._elements]
@@ -1008,9 +1002,7 @@ class TupleStatement(NonDictCollection):
         references.update(self._elements)
         return references
 
-    def replace(  # noqa: D102
-        self, old: vr.VariableReference, new: vr.VariableReference
-    ) -> None:
+    def replace(self, old: vr.VariableReference, new: vr.VariableReference) -> None:  # noqa: D102
         if self.ret_val == old:
             self.ret_val = new
         self._elements = [new if arg == old else arg for arg in self._elements]
@@ -1049,9 +1041,7 @@ class DictStatement(CollectionStatement[tuple[vr.VariableReference, vr.VariableR
             references.add(entry[1])
         return references
 
-    def replace(  # noqa: D102
-        self, old: vr.VariableReference, new: vr.VariableReference
-    ) -> None:
+    def replace(self, old: vr.VariableReference, new: vr.VariableReference) -> None:  # noqa: D102
         if self.ret_val == old:
             self.ret_val = new
         self._elements = [
@@ -1065,10 +1055,12 @@ class DictStatement(CollectionStatement[tuple[vr.VariableReference, vr.VariableR
         change_idx = randomness.next_int(0, 2)
         new = list(element)
         # TODO(fk) what if the current type is not correct?
-        new[change_idx] = randomness.choice([
-            *self.test_case.get_objects(element[change_idx].type, self.get_position()),
-            element[change_idx],
-        ])
+        new[change_idx] = randomness.choice(
+            [
+                *self.test_case.get_objects(element[change_idx].type, self.get_position()),
+                element[change_idx],
+            ]
+        )
         assert len(new) == 2, "Tuple must consist of key and value"
         return new[0], new[1]
 
@@ -1106,15 +1098,15 @@ class DictStatement(CollectionStatement[tuple[vr.VariableReference, vr.VariableR
     def accept(self, visitor: StatementVisitor) -> None:  # noqa: D102
         visitor.visit_dict_statement(self)
 
-    def structural_hash(  # noqa: D102
-        self, memo: dict[vr.VariableReference, int]
-    ) -> int:
-        return hash((
-            self.ret_val.structural_hash(memo),
-            frozenset(
-                (k.structural_hash(memo), v.structural_hash(memo)) for k, v in self._elements
-            ),
-        ))
+    def structural_hash(self, memo: dict[vr.VariableReference, int]) -> int:  # noqa: D102
+        return hash(
+            (
+                self.ret_val.structural_hash(memo),
+                frozenset(
+                    (k.structural_hash(memo), v.structural_hash(memo)) for k, v in self._elements
+                ),
+            )
+        )
 
     def structural_eq(  # noqa: D102
         self, other: Any, memo: dict[vr.VariableReference, vr.VariableReference]
@@ -1222,9 +1214,7 @@ class FieldStatement(VariableCreatingStatement):
             refs.add(var)
         return refs
 
-    def replace(  # noqa: D102
-        self, old: vr.VariableReference, new: vr.VariableReference
-    ) -> None:
+    def replace(self, old: vr.VariableReference, new: vr.VariableReference) -> None:  # noqa: D102
         if self._source == old:
             self._source = new
         else:
@@ -1243,9 +1233,7 @@ class FieldStatement(VariableCreatingStatement):
             and self._source.structural_eq(other._source, memo)  # noqa: SLF001
         )
 
-    def structural_hash(  # noqa: D102
-        self, memo: dict[vr.VariableReference, int]
-    ) -> int:
+    def structural_hash(self, memo: dict[vr.VariableReference, int]) -> int:  # noqa: D102
         return hash((self._field, self.ret_val.structural_hash(memo)))
 
 
@@ -1303,9 +1291,7 @@ class ParametrizedStatement(VariableCreatingStatement, abc.ABC):
         references.update(self.args.values())
         return references
 
-    def replace(  # noqa: D102
-        self, old: vr.VariableReference, new: vr.VariableReference
-    ) -> None:
+    def replace(self, old: vr.VariableReference, new: vr.VariableReference) -> None:  # noqa: D102
         if self.ret_val == old:
             self.ret_val = new
         for key, value in self._args.items():
@@ -1476,14 +1462,14 @@ class ParametrizedStatement(VariableCreatingStatement, abc.ABC):
     def affects_assertions(self) -> bool:  # noqa: D102
         return True
 
-    def structural_hash(  # noqa: D102
-        self, memo: dict[vr.VariableReference, int]
-    ) -> int:
-        return hash((
-            self.ret_val.structural_hash(memo),
-            self._generic_callable,
-            frozenset((k, v.structural_hash(memo)) for k, v in self._args.items()),
-        ))
+    def structural_hash(self, memo: dict[vr.VariableReference, int]) -> int:  # noqa: D102
+        return hash(
+            (
+                self.ret_val.structural_hash(memo),
+                self._generic_callable,
+                frozenset((k, v.structural_hash(memo)) for k, v in self._args.items()),
+            )
+        )
 
     def structural_eq(  # noqa: D102
         self, other: Any, memo: dict[vr.VariableReference, vr.VariableReference]
@@ -1495,7 +1481,7 @@ class ParametrizedStatement(VariableCreatingStatement, abc.ABC):
             and self._generic_callable == other._generic_callable  # noqa: SLF001
             and self._args.keys() == other._args.keys()  # noqa: SLF001
             and all(
-                v.structural_eq(other._args[k], memo)  # noqa: SLF001
+                v.structural_eq(other._args[k], memo)  # noqa: SLF001 # fmt: off
                 for k, v in self._args.items()
             )
         )
@@ -1588,9 +1574,7 @@ class MethodStatement(ParametrizedStatement):
         references.add(self._callee)
         return references
 
-    def replace(  # noqa: D102
-        self, old: vr.VariableReference, new: vr.VariableReference
-    ) -> None:
+    def replace(self, old: vr.VariableReference, new: vr.VariableReference) -> None:  # noqa: D102
         super().replace(old, new)
         if self._callee == old:
             self._callee = new
@@ -1628,9 +1612,7 @@ class MethodStatement(ParametrizedStatement):
     def accept(self, visitor: StatementVisitor) -> None:  # noqa: D102
         visitor.visit_method_statement(self)
 
-    def structural_hash(  # noqa: D102
-        self, memo: dict[vr.VariableReference, int]
-    ) -> int:
+    def structural_hash(self, memo: dict[vr.VariableReference, int]) -> int:  # noqa: D102
         return hash((super().structural_hash(memo), self._callee.structural_hash(memo)))
 
     def structural_eq(  # noqa: D102
@@ -1768,9 +1750,7 @@ class PrimitiveStatement(VariableCreatingStatement, Generic[T]):
     def get_variable_references(self) -> set[vr.VariableReference]:  # noqa: D102
         return {self.ret_val}
 
-    def replace(  # noqa: D102
-        self, old: vr.VariableReference, new: vr.VariableReference
-    ) -> None:
+    def replace(self, old: vr.VariableReference, new: vr.VariableReference) -> None:  # noqa: D102
         if self.ret_val == old:
             self.ret_val = new
 
@@ -1796,12 +1776,11 @@ class PrimitiveStatement(VariableCreatingStatement, Generic[T]):
         if not isinstance(other, self.__class__):
             return False
         return (
-            self.ret_val.structural_eq(other.ret_val, memo) and self._value == other._value  # noqa: SLF001
+            self.ret_val.structural_eq(other.ret_val, memo)
+            and self._value == other._value  # noqa: SLF001
         )
 
-    def structural_hash(  # noqa: D102
-        self, memo: dict[vr.VariableReference, int]
-    ) -> int:
+    def structural_hash(self, memo: dict[vr.VariableReference, int]) -> int:  # noqa: D102
         return hash((self.ret_val.structural_hash(memo), hash(self._value)))
 
     @property
@@ -2680,9 +2659,7 @@ class EnumPrimitiveStatement(PrimitiveStatement[int]):
             and other._generic_enum == self._generic_enum  # noqa: SLF001
         )
 
-    def structural_hash(  # noqa: D102
-        self, memo: dict[vr.VariableReference, int]
-    ) -> int:
+    def structural_hash(self, memo: dict[vr.VariableReference, int]) -> int:  # noqa: D102
         return hash((super().structural_hash(memo), self._generic_enum))
 
     def accept(self, visitor: StatementVisitor) -> None:  # noqa: D102
@@ -2868,9 +2845,7 @@ class ASTAssignStatement(VariableCreatingStatement, abc.ABC):
     def get_variable_references(self) -> set[vr.VariableReference]:  # noqa: D102
         return self.rhs.get_all_var_refs()
 
-    def replace(  # noqa: D102
-        self, old: vr.VariableReference, new: vr.VariableReference
-    ) -> None:
+    def replace(self, old: vr.VariableReference, new: vr.VariableReference) -> None:  # noqa: D102
         self.rhs = self.rhs.replace_var_ref(old, new)
 
     def structural_hash(self, memo) -> int:  # noqa: D102
