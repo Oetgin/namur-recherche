@@ -37,22 +37,9 @@ import astroid
 from astroid.nodes import Assign, AsyncFunctionDef, ClassDef, FunctionDef, Lambda, Module
 
 import pynguin.configuration as config
+import pynguin.utils.pynguinml.ml_testing_resources as tr  # Need to always import because config is not loaded  # noqa: E501
 import pynguin.utils.statistics.stats as stat
 import pynguin.utils.typetracing as tt
-from pynguin.analyses.type_inference import (
-    ANY_STR,
-    HintInference,
-    InferenceProvider,
-    LLMInference,
-    LLMInferenceWithSubtypes,
-    NoInference,
-    TypeEvalPyInference,
-)
-from pynguin.utils.llm import LLMProvider
-
-if config.configuration.pynguinml.ml_testing_enabled or typing.TYPE_CHECKING:
-    import pynguin.utils.pynguinml.ml_testing_resources as tr
-
 from pynguin.analyses.generator import GeneratorProvider, RandomGeneratorProvider
 from pynguin.analyses.modulecomplexity import mccabe_complexity
 from pynguin.analyses.syntaxtree import (
@@ -61,6 +48,15 @@ from pynguin.analyses.syntaxtree import (
     get_class_node_from_ast,
     get_function_description,
     get_function_node_from_ast,
+)
+from pynguin.analyses.type_inference import (
+    ANY_STR,
+    HintInference,
+    InferenceProvider,
+    LLMInference,
+    LLMInferenceWithSubtypes,
+    NoInference,
+    TypeEvalPyInference,
 )
 from pynguin.analyses.typesystem import (
     ANY,
@@ -91,13 +87,11 @@ from pynguin.utils.generic.genericaccessibleobject import (
     GenericFunction,
     GenericMethod,
 )
+from pynguin.utils.llm import LLMProvider
 from pynguin.utils.orderedset import OrderedSet
 from pynguin.utils.statistics.runtimevariable import RuntimeVariable
 from pynguin.utils.type_utils import COLLECTIONS, PRIMITIVES, get_class_that_defined_method
 from pynguin.utils.typeevalpy_json_schema import ParsedTypeEvalPyData, parse_json, provide_json
-
-if config.configuration.pynguinml.ml_testing_enabled or typing.TYPE_CHECKING:
-    import pynguin.utils.pynguinml.ml_testing_resources as tr
 
 if typing.TYPE_CHECKING:
     from collections.abc import Callable, Sequence
@@ -580,6 +574,11 @@ class TestCluster(abc.ABC):  # noqa: PLR0904
 
     @property
     @abc.abstractmethod
+    def callables(self) -> OrderedSet[GenericCallableAccessibleObject]:
+        """Provides all callables from SUT and dependencies."""
+
+    @property
+    @abc.abstractmethod
     def function_data_for_accessibles(
         self,
     ) -> dict[GenericAccessibleObject, CallableData]:
@@ -938,9 +937,7 @@ class ModuleTestCluster(TestCluster):  # noqa: PLR0904
         self.__accessible_objects_under_test.add(objc)
         self.__function_data_for_accessibles[objc] = data
 
-    def add_modifier(  # noqa: D102
-        self, typ: TypeInfo, obj: GenericAccessibleObject
-    ) -> None:
+    def add_modifier(self, typ: TypeInfo, obj: GenericAccessibleObject) -> None:  # noqa: D102
         if isinstance(obj, GenericCallableAccessibleObject):
             self.__callables.add(obj)
 
@@ -951,6 +948,10 @@ class ModuleTestCluster(TestCluster):  # noqa: PLR0904
         self,
     ) -> OrderedSet[GenericAccessibleObject]:
         return self.__accessible_objects_under_test
+
+    @property
+    def callables(self) -> OrderedSet[GenericCallableAccessibleObject]:  # noqa: D102
+        return self.__callables
 
     @property
     def function_data_for_accessibles(  # noqa: D102
@@ -1025,9 +1026,7 @@ class ModuleTestCluster(TestCluster):  # noqa: PLR0904
             return None
         return randomness.choice(self.__accessible_objects_under_test)
 
-    def get_random_call_for(  # noqa: D102
-        self, typ: ProperType
-    ) -> GenericAccessibleObject:
+    def get_random_call_for(self, typ: ProperType) -> GenericAccessibleObject:  # noqa: D102
         accessible_objects = self.get_modifiers_for(typ)
         if len(accessible_objects) == 0:
             raise ConstructionFailedException(f"No modifiers for {typ}")
@@ -1122,9 +1121,7 @@ class FilteredModuleTestCluster(TestCluster):  # noqa: PLR0904
     ) -> None:
         self.__delegate.add_accessible_object_under_test(objc, data)
 
-    def add_modifier(  # noqa: D102
-        self, typ: TypeInfo, obj: GenericAccessibleObject
-    ) -> None:
+    def add_modifier(self, typ: TypeInfo, obj: GenericAccessibleObject) -> None:  # noqa: D102
         self.__delegate.add_modifier(typ, obj)
 
     @property
@@ -1222,6 +1219,10 @@ class FilteredModuleTestCluster(TestCluster):  # noqa: PLR0904
             return self.__delegate.accessible_objects_under_test
         return OrderedSet(accessibles)
 
+    @property
+    def callables(self) -> OrderedSet[GenericCallableAccessibleObject]:  # noqa: D102
+        return self.__delegate.callables
+
     def num_accessible_objects_under_test(self) -> int:  # noqa: D102
         return self.__delegate.num_accessible_objects_under_test()
 
@@ -1253,9 +1254,7 @@ class FilteredModuleTestCluster(TestCluster):  # noqa: PLR0904
             return self.__delegate.get_random_accessible()
         return randomness.choice(OrderedSet(accessibles))
 
-    def get_random_call_for(  # noqa: D102
-        self, typ: ProperType
-    ) -> GenericAccessibleObject:
+    def get_random_call_for(self, typ: ProperType) -> GenericAccessibleObject:  # noqa: D102
         return self.__delegate.get_random_call_for(typ)
 
     def get_all_generatable_types(self) -> list[ProperType]:  # noqa: D102
@@ -1549,7 +1548,7 @@ def __analyse_method(
     *,
     type_info: TypeInfo,
     method_name: str,
-    method: (FunctionType | BuiltinFunctionType | WrapperDescriptorType | MethodDescriptorType),
+    method: FunctionType | BuiltinFunctionType | WrapperDescriptorType | MethodDescriptorType,
     type_inference_provider: InferenceProvider,
     class_tree: ClassDef | None,
     test_cluster: ModuleTestCluster,
