@@ -5,5 +5,9 @@
     "python-envs.defaultEnvManager": "ms-python.python:system",
     "conventionalCommits.scopes": [
         "LLM"
-    ]
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true,
+    "python.testing.cwd": "${workspaceFolder}/pynguin",
+    "todo-tree.tree.showBadges": true
 }
