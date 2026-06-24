@@ -128,7 +128,6 @@ def test_openai_model_query_cache(mocker):
     assert model.llm_calls_counter == 1  # Counter should not increment on cache hit
 
 
-@pytest.mark.skipif(condition=False, reason="")  # TODO (Oetgin) : Skip if Ollama unavailable
 def test_ollama_model_query_success(mocker):
     config.configuration.large_language_model.provider = config.LLMProvider.OLLAMA
     config.configuration.large_language_model.enable_response_caching = True
@@ -154,7 +153,6 @@ def test_ollama_model_query_success(mocker):
     assert model.llm_calls_timer > 0
 
 
-@pytest.mark.skipif(condition=False, reason="")  # TODO (Oetgin) : Skip if Ollama unavailable
 def test_ollama_model_query_cache(mocker):
     config.configuration.large_language_model.provider = config.LLMProvider.OLLAMA
     config.configuration.large_language_model.enable_response_caching = True
@@ -183,7 +181,6 @@ def test_ollama_model_query_cache(mocker):
     assert model.llm_calls_counter == 1  # Counter should not increment on cache hit
 
 
-@pytest.mark.skipif(condition=False, reason="")  # TODO (Oetgin) : Skip if Ollama unavailable
 def test_ollama_extract_python_code_valid():
     llm_output = "Some text\n```python\nprint('Hello, world!')\n```"
     expected_code = "\nprint('Hello, world!')\n"
@@ -192,7 +189,6 @@ def test_ollama_extract_python_code_valid():
     assert model.extract_python_code_from_llm_output(llm_output) == expected_code
 
 
-@pytest.mark.skipif(condition=False, reason="")  # TODO (Oetgin) : Skip if Ollama unavailable
 def test_ollama_extract_python_code_multiple_blocks():
     llm_output = "Text\n```python\nprint('Hello')\n```\nMore text\n```python\nprint('World')\n```"
     expected_code = "\nprint('Hello')\n\n\nprint('World')\n"

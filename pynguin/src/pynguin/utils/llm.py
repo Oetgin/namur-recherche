@@ -56,17 +56,25 @@ LOGGER = logging.getLogger(__name__)
 class LLM(abc.ABC):
     """An abstract interface for LLM communications."""
 
-    def __init__(self, api_key: SecretStr | None, temperature: float, system_prompt: str) -> None:
+    def __init__(
+        self,
+        api_key: SecretStr | None,
+        temperature: float,
+        system_prompt: str,
+        model: str | None = None,
+    ) -> None:
         """Initialises the LLM communication interface.
 
         Args:
             api_key: the API key to authenticate with the LLM
             temperature: the temperature setting for the LLM
             system_prompt: the system prompt for the LLM
+            model: the LLM model
         """
         self._api_key = api_key
         self._temperature = temperature
         self._system_prompt = system_prompt
+        self._model = model
 
     @abc.abstractmethod
     def chat(
@@ -91,15 +99,17 @@ class LLM(abc.ABC):
         """
 
     @classmethod
-    def create(cls, provider: LLMProvider) -> LLM:
+    def create(cls, provider: LLMProvider, **kwargs) -> LLM:
         """Creates the LLM communication interface based on the given provider.
 
         Args:
             provider: the provider of the LLM
+            **kwargs: optionals arguments to be passed for the creation of the client. See :class:`LLM`.
 
         Returns:
             The concrete LLM communication interface
         """
+
         match provider:
             case LLMProvider.OPENAI:
                 if not OPENAI_AVAILABLE:
@@ -107,14 +117,14 @@ class LLM(abc.ABC):
                         "OpenAI API library is not available. You can install it with poetry "
                         "install --with openai."
                     )
-                return OpenAI()
+                return OpenAI(**kwargs)
             case LLMProvider.OLLAMA:
                 if not OLLAMA_AVAILABLE:
                     raise ValueError(
                         "Ollama API library is not available. You can install it with poetry "
                         "install --with ollama."
                     )
-                return Ollama()
+                return Ollama(**kwargs)
             case _:
                 raise NotImplementedError(f"Unknown provider {provider}")
 

@@ -15,6 +15,8 @@ import time
 from pathlib import Path
 from typing import TYPE_CHECKING, cast
 
+from pydantic import SecretStr
+
 from pynguin.large_language_model.prompts.localsearchprompt import LocalSearchPrompt
 from pynguin.utils.llm import LLM
 from pynguin.utils.report import LineAnnotation
@@ -200,22 +202,7 @@ class LLMAgent:
         if config.configuration.large_language_model.enable_response_caching:
             self.cache = Cache()
 
-        self._client: LLM
-        match self._provider:
-            case config.LLMProvider.OPENAI:
-                if not OPENAI_AVAILABLE:
-                    raise ImportError(
-                        "Can't import OpenAI provider. Please make sure the openai package is installed."  # noqa: E501
-                    )
-                self._client = OpenAI()  # pyright: ignore[reportPossiblyUnboundVariable]
-            case config.LLMProvider.OLLAMA:
-                if not OLLAMA_AVAILABLE:
-                    raise ImportError(
-                        "Can't import Ollama provider. Please make sure the ollama package is installed."  # noqa: E501
-                    )
-                self._client = Ollama()  # pyright: ignore[reportPossiblyUnboundVariable]
-            case _:
-                raise NotImplementedError(f"Unknown provider {self._provider}")
+        self._client = LLM.create(self._provider)
 
     @property
     def llm_calls_counter(self) -> int:
