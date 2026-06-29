@@ -187,11 +187,26 @@ def _find_lines(name: str) -> tuple[list[str], int] | None:
 class LLMAgent:
     """A class to interact with the configured provider's LLM for generating unit tests."""
 
-    def __init__(self):
+    def __init__(
+        self,
+        *,
+        provider: config.LLMProvider | None = None,
+        model_name: str | None = None,
+        temperature: float | None = None,
+    ):
         """Initializes the LLMAgent with configuration settings and cache."""
-        self._model_name = get_model_name()
-        self._temperature = config.configuration.large_language_model.temperature
-        self._provider = config.configuration.large_language_model.provider
+        if model_name is None:
+            self._model_name = get_model_name()
+        else:
+            self._model_name = model_name
+        if temperature is None:
+            self._temperature = config.configuration.large_language_model.temperature
+        else:
+            self._temperature = temperature
+        if provider is None:
+            self._provider = config.configuration.large_language_model.provider
+        else:
+            self._provider = provider
         self._llm_calls_counter = 0
         self._llm_calls_timer = 0
         self._llm_calls_with_no_python_code = 0
@@ -202,7 +217,9 @@ class LLMAgent:
         if config.configuration.large_language_model.enable_response_caching:
             self.cache = Cache()
 
-        self._client = LLM.create(self._provider)
+        self._client = LLM.create(
+            self._provider, model=self._model_name, temperature=self._temperature
+        )
 
     @property
     def llm_calls_counter(self) -> int:
@@ -309,7 +326,8 @@ class LLMAgent:
 
     def clear_cache(self):
         """Clears all entries in the cache."""
-        self.cache.clear()
+        if config.configuration.large_language_model.enable_response_caching:
+            self.cache.clear()
 
     def generate_tests_for_module_under_test(self) -> str | None:
         """Generates test cases for the module under test.
