@@ -1,12 +1,13 @@
 import abc
+import csv
 from pathlib import Path
 
 from benchmark.benchmark import BenchmarkExperiment, BenchmarkExperimentResult, Sample
 
-import csv
-
 
 class Exporter(abc.ABC):
+    """Abstract class representing an exporter for benchmark results."""
+
     @classmethod
     @abc.abstractmethod
     def export(
@@ -21,6 +22,8 @@ class Exporter(abc.ABC):
 
 
 class CSV(Exporter):
+    """Exports benchmark results to CSV."""
+
     @classmethod
     def export(
         cls, results: dict[Sample, dict[BenchmarkExperiment, list[BenchmarkExperimentResult]]]
@@ -45,10 +48,12 @@ class CSV(Exporter):
             for sample, experiments in results.items():
                 for experiment, experiment_results in experiments.items():
                     for result in experiment_results:
-                        writer.writerow({
-                            "sample": sample,
-                            "experiment": experiment,
-                            "result_duration": result.duration,
-                            "result_success": result.success,
-                            "result_score": result.score,
-                        })
+                        writer.writerow(
+                            {
+                                "sample": sample,
+                                "experiment": experiment,
+                                "result_duration": result.duration,
+                                "result_success": result.success,
+                                "result_score": result.score,
+                            }
+                        )

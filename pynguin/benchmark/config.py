@@ -1,4 +1,4 @@
-import logging
+import logging  # noqa: D100
 import sys
 from pathlib import Path
 from time import localtime, strftime
@@ -18,6 +18,8 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class ModelBenchmark:
+    """Configuration for benchmarking different LLMs."""
+
     _MODELS: ClassVar[dict] = {
         # Qwen
         "qwen2_5_coder__0_5b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "qwen2.5-coder:0.5b"),
@@ -65,18 +67,42 @@ class ModelBenchmark:
 
 
 if __name__ == "__main__":
-    log_formatter = logging.Formatter(
-        "%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s"
-    )
-    benchmark_logger = logging.getLogger("benchmark")
 
-    benchmark_logger.setLevel(logging.DEBUG)
-    file_handler = logging.FileHandler(f"{strftime('%d-%m-%Y_%H-%M-%S', localtime())}.log")
+    class BenchmarkWhitelistFilter(logging.Filter):
+        """Logging filter for benchmarking."""
+
+        def filter(self, record: logging.LogRecord) -> bool:
+            """Filters benchmarking records for logging purposes.
+
+            Args:
+                record (logging.LogRecord): Record to filter.
+
+            Returns:
+                bool: True if record is from the benchmarking logic.
+            """
+            return record.name == "__main__" or record.name.startswith("benchmark")
+
+    log_formatter = logging.Formatter(
+        "%(asctime)s [%(threadName)s] [%(levelname)s] [%(name)s] %(message)s"
+    )
+
+    root_logger = logging.getLogger()
+    if root_logger.hasHandlers():
+        root_logger.handlers.clear()
+
+    root_logger.setLevel(logging.DEBUG)
+
+    file_handler = logging.FileHandler(f".logs/{strftime('%d-%m-%Y_%H-%M-%S', localtime())}.log")
     file_handler.setFormatter(log_formatter)
-    benchmark_logger.addHandler(file_handler)
+    root_logger.addHandler(file_handler)
+
     console_handler = logging.StreamHandler()
     console_handler.setFormatter(log_formatter)
-    benchmark_logger.addHandler(console_handler)
+    console_handler.addFilter(BenchmarkWhitelistFilter())
+    root_logger.addHandler(console_handler)
+
+    logging.getLogger("httpcore").setLevel(logging.WARNING)
+    logging.getLogger("httpx").setLevel(logging.WARNING)
 
     _LOGGER.info("Running benchmark")
     ModelBenchmark.benchmark.run()

@@ -10,6 +10,7 @@ import abc
 import datetime
 import logging
 import sys
+import textwrap
 import time
 from collections.abc import Callable, Iterator
 from contextlib import contextmanager
@@ -26,17 +27,44 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class Sample:
+    """Code sample to run an experiment on."""
+
     def __init__(
-        self, test_cluster: ModuleTestCluster, module_name: str, module_root: Path, module_code
+        self, test_cluster: ModuleTestCluster, module_name: str, module_root: Path, module_code: str
     ) -> None:
+        """Initializes the sample.
+
+        Args:
+            test_cluster (ModuleTestCluster): The test cluster representing the sample.
+            module_name (str): The module name (without .py).
+            module_root (Path): The module root path.
+            module_code (str): Code contained in the module.
+        """
         self.test_cluster = test_cluster
         self.module_name = module_name
         self.module_root = module_root
         self.module_code = module_code
 
+    def __str__(self) -> str:
+        return f"Sample from module {self.module_name}"
+
+    def __repr__(self) -> str:
+        return textwrap.dedent(f"""Sample(
+            test_cluster={self.test_cluster!r},
+            module_name="{self.module_name}", 
+            module_root={self.module_root!r}, 
+            module_code={self.module_code!r})""")  # noqa: W291
+
 
 class Dataset:
+    """Manages a set of code samples to run experiments on."""
+
     def __init__(self, path: Path) -> None:
+        """Creates a dataset.
+
+        Args:
+            path (Path): Path of the dataset, including projects and modules.
+        """
         self._path = path
 
     @classmethod
@@ -88,6 +116,15 @@ class Dataset:
     def get_samples(
         self, type_inference_strategy: TypeInferenceStrategy = TypeInferenceStrategy.TYPE_HINTS
     ) -> Iterator[Sample]:
+        """Generator for code samples in the dataset.
+
+        Args:
+            type_inference_strategy (TypeInferenceStrategy, optional): Strategy for inferring types.
+            Defaults to TypeInferenceStrategy.TYPE_HINTS.
+
+        Yields:
+            Iterator[Sample]: A sample in the dataset.
+        """
         for module_path in self._get_projects_from_path(self._path):
             if module_path.is_file():
                 module_root = module_path.parent
@@ -98,11 +135,11 @@ class Dataset:
                         continue
                     candidate_root = self._module_import_root(module_path, candidate)
                     candidate_name = self._module_name(module_path, candidate)
-                    if any(module_name in candidate_name for module_name in {"setup", "__init__"}):
-                        _LOGGER.debug(f"Skipped module {candidate_name}")
+                    if any(module_name in candidate_name for module_name in ("setup", "__init__")):
+                        _LOGGER.debug("Skipped module %s", candidate_name)
                         continue
                     with self._prepend_sys_path(candidate_root):
-                        _LOGGER.debug(f"Generating test cluster for {candidate_name}")
+                        _LOGGER.debug("Generating test cluster for %s", candidate_name)
                         sample = Sample(
                             generate_test_cluster(candidate_name, type_inference_strategy),
                             candidate_name,
@@ -120,6 +157,9 @@ class Dataset:
                     module_path.read_text(encoding="utf-8"),
                 )
                 yield sample
+
+    def __repr__(self) -> str:
+        return f"Dataset(path={self._path})"
 
 
 class BenchmarkExperimentResult:
@@ -189,6 +229,8 @@ class BenchmarkSuite:
         Args:
             experiments (list[T: BenchmarkExperiment]):
                 List of experiments to run.
+            dataset (Dataset):
+                Dataset of code samples to run the experiments on.
             n_runs (int, optional):
                 Number of runs.
                 Defaults to 1.
@@ -203,8 +245,11 @@ class BenchmarkSuite:
         _LOGGER.info("Setting up benchmark")
         self._setup()
         _LOGGER.info("Running benchmark")
-        for sample in tqdm(self._dataset.get_samples()):
+        for sample in (pbar := tqdm(self._dataset.get_samples())):
+            pbar.set_description(f"Processing {sample.module_name}")
+            pbar.refresh()
             self._step(sample)
+        pbar.close()
 
     def _setup(self):
         """Setup all experiments."""
@@ -226,6 +271,12 @@ class BenchmarkSuite:
         list of :class:`BenchmarkExperimentResult`.
         """  # noqa: D205
         return self._results
+
+    def __repr__(self) -> str:
+        return textwrap.dedent(f"""BenchmarkSuite(
+            experiments={self._experiments!r}, 
+            dataset={self._dataset!r}, 
+            n_runs={self._n_runs})""")  # noqa: W291
 
 
 P = ParamSpec("P")

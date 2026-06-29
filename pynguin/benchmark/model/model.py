@@ -7,22 +7,25 @@
 """LLM model benchmarking."""
 
 import logging
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 import ollama
 from benchmark.benchmark import (
     BenchmarkExperiment,
     BenchmarkExperimentResult,
-    Dataset,
     Sample,
     measure_exec_time,
 )
+from tqdm import tqdm
 
+import pynguin.generator
+from pynguin import configuration as config
 from pynguin.configuration import LLMProvider
-from pynguin.large_language_model.llmagent import LLMAgent
-from pynguin.large_language_model.llmtestcasehandler import LLMTestCaseHandler
-from pynguin.large_language_model.parsing.deserializer import deserialize_code_to_testcases
-from pynguin.large_language_model.prompts.testcasegenerationprompt import TestCaseGenerationPrompt
+from pynguin.ga.algorithms.llmosalgorithm import LLMOSAAlgorithm
+from pynguin.slicer.statementslicingobserver import RemoteStatementSlicingObserver
+
+if TYPE_CHECKING:
+    from pynguin.ga.algorithms.generationalgorithm import GenerationAlgorithm
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -47,41 +50,71 @@ class ModelBenchmarkExperiment(BenchmarkExperiment):
         self.model = model
         self.temperature = temperature
 
-    def setup(self):
-        if self.provider == LLMProvider.OLLAMA and any(
-            model == self.model for model in ollama.Client().list().models
+    def setup(self):  # noqa: D102
+        if self.provider == LLMProvider.OLLAMA and not any(
+            model.model == self.model for model in ollama.Client().list().models
         ):
-            _LOGGER.info(f"Model {self.model} not found. Pulling from Ollama...")
-            ollama.Client().pull(self.model)
+            _LOGGER.info("Model %s not found. Pulling from Ollama...", self.model)
+            progress_response = ollama.Client().pull(self.model, stream=True)
+
+            pbar = tqdm(unit="b", unit_scale=True)
+            for progress in progress_response:
+                if progress.completed is None:
+                    pbar.set_description(progress.status)
+                else:
+                    pbar.set_description(f"Pulling model {self.model}")
+                    pbar.total = progress.total
+                    pbar.n = progress.completed
+                    pbar.refresh()
+            pbar.close()
 
     @measure_exec_time
     def run(self, sample: Sample) -> BenchmarkExperimentResult:  # noqa: D102
-        _LOGGER.debug(f"Running model experiment (model : {self.model})")
+        _LOGGER.debug("Running model experiment (model : %s)", self.model)
         try:
-            module_code = sample.module_code
-            module_path = str(sample.module_root / Path(sample.module_name))
             test_cluster = sample.test_cluster
 
-            prompt = TestCaseGenerationPrompt(module_code, module_path)
+            config.configuration.large_language_model.provider = self.provider
+            config.configuration.large_language_model.model_name = self.model
+            if self.temperature is not None:
+                config.configuration.large_language_model.temperature = self.temperature
 
-            model = LLMAgent(
-                provider=self.provider, model_name=self.model, temperature=self.temperature
+            config.configuration.algorithm = config.Algorithm.LLMOSA
+            config.configuration.module_name = sample.module_name
+
+            if (setup_result := pynguin.generator._setup_and_check()) is None:  # noqa: SLF001
+                _LOGGER.error("Setup failed")
+                return BenchmarkExperimentResult(success=False)
+            executor, test_cluster, constant_provider = setup_result
+            coverage_metrics = config.configuration.statistics_output.coverage_metrics
+            if config.CoverageMetric.CHECKED in coverage_metrics:
+                executor.add_remote_observer(RemoteStatementSlicingObserver())
+
+            algorithm: GenerationAlgorithm = (
+                pynguin.generator._instantiate_test_generation_strategy(  # noqa: SLF001
+                    executor, test_cluster, constant_provider
+                )
             )
-            model.clear_cache()
 
-            llm_query_results = model.query(prompt)
-            if llm_query_results is None:
+            if not isinstance(algorithm, LLMOSAAlgorithm):
+                _LOGGER.error("Algorithm type is not LLMOSA")
                 return BenchmarkExperimentResult(success=False)
 
-            handler = LLMTestCaseHandler(model)
-            llm_test_cases_str = handler.extract_test_cases_from_llm_output(llm_query_results)
+            algorithm.model.clear_cache()
 
-            deserialize_code_to_testcases(llm_test_cases_str, test_cluster=test_cluster)
+            llm_chromosomes = algorithm.target_uncovered_callables()
+            algorithm._population += llm_chromosomes  # noqa: SLF001
+            algorithm._archive.update(algorithm._population)  # noqa: SLF001
 
-            # TODO (Oetgin): Compute coverage using pynguin's coverage computation and return the score in the BenchmarkExperimentResult
-            score = compute_coverage(test_cluster, sample.module_name, sample.module_root)
+            coverage_after = algorithm.create_test_suite(
+                algorithm._archive.solutions  # noqa: SLF001
+            ).get_coverage()
 
-            return BenchmarkExperimentResult(success=True, score=score)
-        except BaseException as e:
-            _LOGGER.error(f"Error running model experiment (model : {self.model}) : {e}")
+            return BenchmarkExperimentResult(success=True, score=coverage_after)
+
+        except Exception:
+            _LOGGER.exception("Error running model experiment (model : %s)", self.model)
             return BenchmarkExperimentResult(success=False)
+
+    def __str__(self) -> str:
+        return f"Model experiment ({self.model})"
