@@ -21,7 +21,7 @@ from typing import Concatenate, ParamSpec, TypeVar
 from rich.console import Console, Group
 from rich.live import Live
 from rich.panel import Panel
-from rich.progress import Progress
+from rich.progress import BarColumn, Progress, SpinnerColumn, TaskProgressColumn, TextColumn
 
 from pynguin.analyses.module import ModuleTestCluster, generate_test_cluster
 from pynguin.configuration import TypeInferenceStrategy
@@ -250,9 +250,15 @@ class BenchmarkSuite:
         _LOGGER.info("Running benchmark")
 
         console = Console()
-        status = console.status("Processing samples...")
-        progress = Progress(transient=True)
-        with Live(Panel(Group(status, progress))):
+        status = console.status("Processing sample...")
+        progress = Progress(
+            TextColumn("[progress.description]{task.description}"),
+            BarColumn(),
+            SpinnerColumn("simpleDotsScrolling"),
+            TextColumn("[progress.percentage]({task.completed}/{task.total})"),
+            transient=True,
+        )
+        with Live(Panel(Group(status, progress)), transient=True):
             for sample in self._dataset.get_samples():
                 status.update(f"Benchmarking on module {sample.module_name}")
                 sample_task = progress.add_task("Running experiments", total=len(self._experiments))
@@ -275,7 +281,8 @@ class BenchmarkSuite:
                     progress.update(sample_task, advance=1)
 
                 progress.remove_task(sample_task)
-            status.update("[bold green]Benchmark completed")
+                status.update("Processing sample...")
+        _LOGGER.info("Benchmark completed")
 
     def _setup(self):
         """Setup all experiments."""
