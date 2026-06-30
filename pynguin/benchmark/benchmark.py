@@ -18,7 +18,10 @@ from functools import wraps
 from pathlib import Path
 from typing import Concatenate, ParamSpec, TypeVar
 
-from tqdm import tqdm
+from rich.console import Console, Group
+from rich.live import Live
+from rich.panel import Panel
+from rich.progress import Progress
 
 from pynguin.analyses.module import ModuleTestCluster, generate_test_cluster
 from pynguin.configuration import TypeInferenceStrategy
@@ -240,30 +243,44 @@ class BenchmarkSuite:
         self._n_runs = n_runs
         self._results: dict[Sample, dict[BenchmarkExperiment, list[BenchmarkExperimentResult]]] = {}
 
-    def run(self):
+    def run(self) -> None:
         """Run the Benchmark suite and collect results."""
         _LOGGER.info("Setting up benchmark")
         self._setup()
         _LOGGER.info("Running benchmark")
-        for sample in (pbar := tqdm(self._dataset.get_samples())):
-            pbar.set_description(f"Processing {sample.module_name}")
-            pbar.refresh()
-            self._step(sample)
-        pbar.close()
+
+        console = Console()
+        status = console.status("Processing samples...")
+        progress = Progress(transient=True)
+        with Live(Panel(Group(status, progress))):
+            for sample in self._dataset.get_samples():
+                status.update(f"Benchmarking on module {sample.module_name}")
+                sample_task = progress.add_task("Running experiments", total=len(self._experiments))
+
+                for experiment in self._experiments:
+                    self._results[sample] = {}
+                    if self._n_runs != 1:
+                        experiment_task = progress.add_task(
+                            "Experiment progress", total=self._n_runs
+                        )
+                        results: list[BenchmarkExperimentResult] = []
+                        for _ in range(self._n_runs):
+                            results.append(experiment.run(sample))
+                            progress.update(experiment_task, advance=1)
+                        progress.remove_task(experiment_task)
+                    else:
+                        results = [experiment.run(sample)]
+
+                    self._results[sample][experiment] = results
+                    progress.update(sample_task, advance=1)
+
+                progress.remove_task(sample_task)
+            status.update("[bold green]Benchmark completed")
 
     def _setup(self):
         """Setup all experiments."""
         for experiment in self._experiments:
             experiment.setup()
-
-    def _step(self, sample: Sample) -> None:
-        """Run all experiments n times on a sample and collect results."""
-        for experiment in tqdm(self._experiments):
-            self._results[sample] = {}
-            results: list[BenchmarkExperimentResult] = [
-                experiment.run(sample) for _ in tqdm(range(self._n_runs))
-            ]
-            self._results[sample][experiment] = results
 
     @property
     def results(self) -> dict[Sample, dict[BenchmarkExperiment, list[BenchmarkExperimentResult]]]:

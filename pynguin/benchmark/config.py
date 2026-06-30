@@ -9,6 +9,8 @@ if __package__ in {None, ""}:
     sys.path.insert(0, str(_PACKAGE_ROOT))
     sys.path.insert(0, str(_PACKAGE_ROOT / "src"))
 
+from rich.logging import RichHandler
+
 from benchmark.benchmark import BenchmarkSuite, Dataset
 from benchmark.export import CSV
 from benchmark.model.model import ModelBenchmarkExperiment
@@ -82,9 +84,7 @@ if __name__ == "__main__":
             """
             return record.name == "__main__" or record.name.startswith("benchmark")
 
-    log_formatter = logging.Formatter(
-        "%(asctime)s [%(threadName)s] [%(levelname)s] [%(name)s] %(message)s"
-    )
+    log_formatter = logging.Formatter("%(asctime)s [%(threadName)s] [%(levelname)s] %(message)s")
 
     root_logger = logging.getLogger()
     if root_logger.hasHandlers():
@@ -96,14 +96,14 @@ if __name__ == "__main__":
     file_handler.setFormatter(log_formatter)
     root_logger.addHandler(file_handler)
 
-    console_handler = logging.StreamHandler()
-    console_handler.setFormatter(log_formatter)
-    console_handler.addFilter(BenchmarkWhitelistFilter())
-    root_logger.addHandler(console_handler)
+    rich_handler = RichHandler()
+    rich_handler.setFormatter(log_formatter)
+    rich_handler.addFilter(BenchmarkWhitelistFilter())
+    root_logger.addHandler(rich_handler)
 
     logging.getLogger("httpcore").setLevel(logging.WARNING)
     logging.getLogger("httpx").setLevel(logging.WARNING)
 
-    _LOGGER.info("Running benchmark")
+    _LOGGER.info("Running model benchmark")
     ModelBenchmark.benchmark.run()
     CSV.export(ModelBenchmark.benchmark.results)

@@ -1,4 +1,4 @@
-import abc
+import abc  # noqa: D100
 import csv
 from pathlib import Path
 

@@ -4,7 +4,9 @@
     ],
     "python-envs.defaultEnvManager": "ms-python.python:system",
     "conventionalCommits.scopes": [
-        "LLM"
+        "LLM",
+        "Tests",
+        "Benchmark"
     ],
     "python.testing.unittestEnabled": false,
     "python.testing.pytestEnabled": true,

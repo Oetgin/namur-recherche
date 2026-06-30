@@ -16,7 +16,14 @@ from benchmark.benchmark import (
     Sample,
     measure_exec_time,
 )
-from tqdm import tqdm
+from rich.progress import (
+    BarColumn,
+    DownloadColumn,
+    Progress,
+    TextColumn,
+    TimeRemainingColumn,
+    TransferSpeedColumn,
+)
 
 import pynguin.generator
 from pynguin import configuration as config
@@ -57,16 +64,29 @@ class ModelBenchmarkExperiment(BenchmarkExperiment):
             _LOGGER.info("Model %s not found. Pulling from Ollama...", self.model)
             progress_response = ollama.Client().pull(self.model, stream=True)
 
-            pbar = tqdm(unit="b", unit_scale=True)
-            for progress in progress_response:
-                if progress.completed is None:
-                    pbar.set_description(progress.status)
-                else:
-                    pbar.set_description(f"Pulling model {self.model}")
-                    pbar.total = progress.total
-                    pbar.n = progress.completed
-                    pbar.refresh()
-            pbar.close()
+            pbar = Progress(
+                TextColumn("[progress.description]{task.description}"),
+                BarColumn(bar_width=None),
+                "[progress.percentage]{task.percentage:>3.1f}%",
+                "•",
+                DownloadColumn(),
+                "•",
+                TransferSpeedColumn(),
+                "•",
+                TimeRemainingColumn(),
+            )
+            task = pbar.add_task(f"Pulling model {self.model}")
+            with pbar:
+                for progress in progress_response:
+                    if progress.completed is None:
+                        pbar.update(task, description=progress.status)
+                    else:
+                        pbar.update(
+                            task,
+                            description=progress.status,
+                            total=progress.total,
+                            completed=progress.completed,
+                        )
 
     @measure_exec_time
     def run(self, sample: Sample) -> BenchmarkExperimentResult:  # noqa: D102
@@ -103,6 +123,8 @@ class ModelBenchmarkExperiment(BenchmarkExperiment):
             algorithm.model.clear_cache()
 
             llm_chromosomes = algorithm.target_uncovered_callables()
+            if not llm_chromosomes:
+                _LOGGER.warning("No LLM chromosomes generated")
             algorithm._population += llm_chromosomes  # noqa: SLF001
             algorithm._archive.update(algorithm._population)  # noqa: SLF001
 
@@ -110,6 +132,7 @@ class ModelBenchmarkExperiment(BenchmarkExperiment):
                 algorithm._archive.solutions  # noqa: SLF001
             ).get_coverage()
 
+            _LOGGER.debug("Model %s experiment completed, coverage=%s", self.model, coverage_after)
             return BenchmarkExperimentResult(success=True, score=coverage_after)
 
         except Exception:
