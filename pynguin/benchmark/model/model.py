@@ -44,7 +44,9 @@ class ModelBenchmarkExperiment(BenchmarkExperiment):
         self,
         provider: LLMProvider,
         model: str,
+        *,
         temperature: float | None = None,
+        only_llm: bool = False,
     ) -> None:
         """Benchark different AI models.
 
@@ -52,10 +54,14 @@ class ModelBenchmarkExperiment(BenchmarkExperiment):
             provider (LLMProvider): Model provider.
             model (str): Model name.
             temperature (float | None, optional): Optional temperature parameter.
+            only_llm (bool, optional): Only use LLM generated testcases.
+                If False, will also use the standard algorithm and only call the LLM on plateaus.
+                Defaults to False.
         """
         self.provider = provider
         self.model = model
         self.temperature = temperature
+        self.only_llm = only_llm
 
     def setup(self):  # noqa: D102
         if self.provider == LLMProvider.OLLAMA and not any(
@@ -120,19 +126,30 @@ class ModelBenchmarkExperiment(BenchmarkExperiment):
                 _LOGGER.error("Algorithm type is not LLMOSA")
                 return BenchmarkExperimentResult(success=False)
 
-            algorithm.model.clear_cache()
+            if self.only_llm:
+                algorithm.model.clear_cache()
 
-            llm_chromosomes = algorithm.target_uncovered_callables()
-            if not llm_chromosomes:
-                _LOGGER.warning("No LLM chromosomes generated")
-            algorithm._population += llm_chromosomes  # noqa: SLF001
-            algorithm._archive.update(algorithm._population)  # noqa: SLF001
+                llm_chromosomes = algorithm.target_uncovered_callables()
+                if not llm_chromosomes:
+                    _LOGGER.warning("No LLM chromosomes generated")
+                algorithm._population += llm_chromosomes  # noqa: SLF001
+                algorithm._archive.update(algorithm._population)  # noqa: SLF001
+
+                coverage_after = algorithm.create_test_suite(
+                    algorithm._archive.solutions  # noqa: SLF001
+                ).get_coverage()
+
+                _LOGGER.debug(
+                    "Model %s experiment completed, coverage=%s", self.model, coverage_after
+                )
+                return BenchmarkExperimentResult(success=True, score=coverage_after)
+
+            algorithm.generate_tests()
 
             coverage_after = algorithm.create_test_suite(
                 algorithm._archive.solutions  # noqa: SLF001
             ).get_coverage()
 
-            _LOGGER.debug("Model %s experiment completed, coverage=%s", self.model, coverage_after)
             return BenchmarkExperimentResult(success=True, score=coverage_after)
 
         except Exception:

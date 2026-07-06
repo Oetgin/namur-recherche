@@ -117,6 +117,7 @@ scikit-learn = "1.7.2"
 gym = "^0.26.2"
 progressbar33 = "^2.4"
 types-tqdm = "^4.68.0.20260608"
+pandas-stubs = "2.3.3.260113"
 
 [tool.poetry.extras]
 openai = [ "openai", "python-dotenv" ]
