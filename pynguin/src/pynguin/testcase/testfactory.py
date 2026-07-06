@@ -43,10 +43,9 @@ if TYPE_CHECKING:
     from pynguin.utils.orderedset import OrderedSet
     from pynguin.utils.pynguinml.mlparameter import MLParameter
 
-if config.configuration.pynguinml.ml_testing_enabled or TYPE_CHECKING:
-    import pynguin.utils.pynguinml.ml_parsing_utils as mlpu
-    import pynguin.utils.pynguinml.ml_testfactory_utils as mltu
-    import pynguin.utils.pynguinml.ml_testing_resources as tr
+import pynguin.utils.pynguinml.ml_parsing_utils as mlpu
+import pynguin.utils.pynguinml.ml_testfactory_utils as mltu
+import pynguin.utils.pynguinml.ml_testing_resources as tr
 
 
 # TODO(fk) find better name for this?
