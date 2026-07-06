@@ -15,28 +15,6 @@ import time
 from pathlib import Path
 from typing import TYPE_CHECKING, cast
 
-from pydantic import SecretStr
-
-from pynguin.large_language_model.prompts.localsearchprompt import LocalSearchPrompt
-from pynguin.utils.llm import LLM
-from pynguin.utils.report import LineAnnotation
-
-try:
-    from pynguin.utils.llm import OpenAI
-
-    OPENAI_AVAILABLE = True
-except ImportError:
-    OPENAI_AVAILABLE = False
-
-try:
-    from pynguin.utils.llm import Ollama
-
-    OLLAMA_AVAILABLE = True
-
-except ImportError:
-    OLLAMA_AVAILABLE = False
-
-
 import pynguin.configuration as config
 import pynguin.utils.statistics.stats as stat
 from pynguin.analyses.module import import_module
@@ -45,6 +23,7 @@ from pynguin.large_language_model.llmtestcasehandler import LLMTestCaseHandler
 from pynguin.large_language_model.prompts.assertiongenerationprompt import (
     AssertionGenerationPrompt,
 )
+from pynguin.large_language_model.prompts.localsearchprompt import LocalSearchPrompt
 from pynguin.large_language_model.prompts.prompt import Prompt
 from pynguin.large_language_model.prompts.testcasegenerationprompt import (
     TestCaseGenerationPrompt,
@@ -58,6 +37,8 @@ from pynguin.utils.api_key_resolver import (
 from pynguin.utils.generic.genericaccessibleobject import (
     GenericCallableAccessibleObject,
 )
+from pynguin.utils.llm import LLM
+from pynguin.utils.report import LineAnnotation
 from pynguin.utils.statistics.runtimevariable import RuntimeVariable
 
 if TYPE_CHECKING:
