@@ -239,8 +239,6 @@ class StatementDeserializer:  # noqa: PLR0904
         Returns:
             Tuple of (source, val_elem, operator) or None if extraction fails.
         """
-        # FIME : Add support for 'assert x == y' and 'assert x is y' pattern
-
         # Pattern 1: Assertion on attribute access
         # Example: assert x.attr == 5
         if (

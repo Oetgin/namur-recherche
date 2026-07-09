@@ -631,11 +631,13 @@ def test_all_assertions():
 
 
 def test_create_stmt_from_collection(deserializer):
-    module = ast.parse(textwrap.dedent("""
+    module = ast.parse(
+        textwrap.dedent("""
         def test_collections():
             a = [1, 2, 3]
             b = {"x": 1, "y": 2}
-    """))
+    """)
+    )
     fn_body = module.body[0].body
     list_node = fn_body[0].value  # [1, 2, 3]
     dict_node = fn_body[1].value  # {"x": 1, "y": 2}

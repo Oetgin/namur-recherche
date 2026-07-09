@@ -104,12 +104,12 @@ class LLM(abc.ABC):
 
         Args:
             provider: the provider of the LLM
-            **kwargs: optionals arguments to be passed for the creation of the client. See :class:`LLM`.
+            **kwargs: optionals arguments to be passed for the creation of the client.
+                See :class:`LLM`.
 
         Returns:
             The concrete LLM communication interface
         """
-
         match provider:
             case LLMProvider.OPENAI:
                 if not OPENAI_AVAILABLE:
