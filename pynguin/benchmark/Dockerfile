@@ -2,23 +2,26 @@
 #
 # SPDX-License-Identifier: MIT
 
-###############################################################################
-# Dockerfile to build a Docker container image for Pynguin.                   #
-# This is a multi-stage image, i.e., it first builds the Pynguin tar-ball     #
-# from the sources and installs it in a later stage for execution.            #
-# The image is built in a way that it accepts all command-line parameters for #
-# Pynguin as parameters to Docker's `run` command.                            #
-###############################################################################
+################################################################################
+# Dockerfile to run the benchmark for Pynguin.                                 #
+#                                                                              #
+# Build with `docker build -t pynguin-benchmark -f benchmark/Dockerfile .`     #
+# from the root directory of the Pynguin repository.                           #
+#                                                                              #
+# The LLM provider port should be mapped to the host machine, e.g., using      #
+# `-p 11434:11434` to map the port 11434 of the container to the host machine. #
+#                                                                              #
+# To register results, mount a volume to the container, e.g., using            #
+# `-v /path/to/results:/pynguin/results`.                                      #
+################################################################################
 
 # The Python version to use
 ARG PYTHON_VERSION=3.10.16
 
-# Build stage for Pynguin
-FROM python:${PYTHON_VERSION}-slim-bullseye AS build
-LABEL org.opencontainers.image.authors="Stephan Lukasczyk <stephan@pynguin.eu>"
+FROM python:${PYTHON_VERSION}-slim-bullseye AS pynguin-benchmark
 ENV POETRY_VERSION="1.8.4"
 
-WORKDIR /pynguin-build
+WORKDIR /pynguin
 
 # Python shall not write the byte code to *.pyc files; they cannot be cached between
 # runs of the container anyway, hence we save the required time and resources for that
@@ -29,13 +32,13 @@ ENV PYTHONUNBUFFERED=1
 
 COPY . .
 
-RUN pip install poetry==$POETRY_VERSION
+RUN pip install poetry==$POETRY_VERSION 
 RUN poetry config virtualenvs.create false
-RUN poetry build
 
+RUN apt-get update
+RUN apt-get install -y --no-install-recommends g++
 
-# Execution stage for Pynguin
-FROM python:${PYTHON_VERSION}-slim-bullseye AS execute
+RUN poetry install --with sutlibs --all-extras
 
 # Set environment variables
 # Set the Pynguin version
@@ -55,16 +58,10 @@ ENV PYTHONUNBUFFERED=1
 # Disable random hash seeding for reproducible runs
 ENV PYTHONHASHSEED=0
 
-WORKDIR /pynguin
-
-COPY --from=build /pynguin-build/dist/pynguin-${PYNGUIN_VERSION}-py3-none-any.whl .
-COPY --from=build /pynguin-build/pynguin-docker.sh .
-
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get install -y --no-install-recommends \
     git \
-    python-tk \
-    && rm -rf /var/lib/apt/lists/*
+    python-tk
+RUN rm -rf /var/lib/apt/lists/*
 
-RUN pip install /pynguin/pynguin-${PYNGUIN_VERSION}-py3-none-any.whl[openai,numpy,typing]
-ENTRYPOINT ["/pynguin/pynguin-docker.sh"]
+ENTRYPOINT ["python", "benchmark/config.py"]
 CMD []

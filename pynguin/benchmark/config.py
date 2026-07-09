@@ -1,4 +1,14 @@
-import logging  # noqa: D100
+#  This file is part of Pynguin.
+#
+#  SPDX-FileCopyrightText: 2019–2026 Pynguin Contributors
+#
+#  SPDX-License-Identifier: MIT
+#
+"""Benchmark configurations."""
+# TODO (Oetgin): Refactor, config should not be used to run the benchmark, but only to configure it.
+# ruff: noqa: ERA001
+
+import logging
 import sys
 from pathlib import Path
 from time import localtime, strftime
@@ -12,8 +22,8 @@ if __package__ in {None, ""}:
 from rich.logging import RichHandler
 
 from benchmark.benchmark import BenchmarkSuite, Dataset
+from benchmark.benchmarks.model import ModelBenchmarkExperiment
 from benchmark.export import CSV
-from benchmark.model.model import ModelBenchmarkExperiment
 from pynguin.configuration import LLMProvider
 
 _LOGGER = logging.getLogger(__name__)
@@ -26,7 +36,7 @@ class ModelBenchmark:
         # Qwen
         "qwen2_5_coder__0_5b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "qwen2.5-coder:0.5b"),
         "qwen2_5_coder__1_5b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "qwen2.5-coder:1.5b"),
-        # "qwen2_5_coder__3b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "qwen2.5-coder:3b"),
+        "qwen2_5_coder__3b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "qwen2.5-coder:3b"),
         # "qwen2_5_coder__7b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "qwen2.5-coder:7b"),
         # "qwen2_5__0_5b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "qwen2.5:0.5b"),
         # "qwen2_5__1_5b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "qwen2.5:1.5b"),
@@ -38,37 +48,45 @@ class ModelBenchmark:
         # "qwen3_5__0_8b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "qwen3.5:0.8b"),
         # "qwen3_5__2b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "qwen3.5:2b"),
         # "qwen3_5__4b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "qwen3.5:4b"),
-        # # Codellama / Codegemma
+        # Codellama / Codegemma
         # "codellama__7b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "codellama:7b"),
         # "codegemma__2b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "codegemma:2b"),
         # "codegemma__7b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "codegemma:7b"),
-        # # Gemma
-        # "gemma4__e2b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "gemma4:e2b"),
+        # Gemma
+        "gemma4__e2b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "gemma4:e2b"),
         # "gemma4__e4b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "gemma4:e4b"),
-        # # Olmo
+        # Olmo
         # "olmo_3__7b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "olmo-3:7b"),
-        # # LFM
+        # LFM
         # "lfm2_5__8b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "lfm2.5:8b"),
-        # # Phi
+        # Phi
         # "phi4_mini__3_8b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "phi4-mini:3.8b"),
         # "phi4_mini_reasoning__3_8b": ModelBenchmarkExperiment(
         #     LLMProvider.OLLAMA, "phi4-mini-reasoning:3.8b"
         # ),
-        # # Deepseek
-        # "deepseek_coder__1_3b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "deepseek-coder:1.3b"),
-        # "deepseek_coder__6_7b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "deepseek-coder:6.7b"),
+        # Deepseek
+        # "deepseek_coder__1_3b": ModelBenchmarkExperiment(
+        #     LLMProvider.OLLAMA, "deepseek-coder:1.3b"
+        # ),
+        # "deepseek_coder__6_7b": ModelBenchmarkExperiment(
+        #     LLMProvider.OLLAMA, "deepseek-coder:6.7b"
+        # ),
         # "deepseek_r1__1_5b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "deepseek-r1:1.5b"),
         # "deepseek_r1__7b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "deepseek-r1:7b"),
     }
 
     experiments: ClassVar[list] = list(_MODELS.values())
 
-    dataset = Dataset(Path(__file__).resolve().parent / "model" / "samples")
+    dataset = Dataset(Path(__file__).resolve().parent / "samples")
 
-    benchmark = BenchmarkSuite(experiments, dataset, n_runs=30)
+    benchmark = BenchmarkSuite(experiments, dataset, n_runs=3, max_samples=5)
 
 
-if __name__ == "__main__":
+def main() -> None:
+    """Main function to run configured benchmarks."""
+    out_dir = Path("results")
+    out_dir.mkdir(parents=True, exist_ok=True)
+    out_dir.joinpath(".logs").mkdir(parents=True, exist_ok=True)
 
     class BenchmarkWhitelistFilter(logging.Filter):
         """Logging filter for benchmarking."""
@@ -92,7 +110,9 @@ if __name__ == "__main__":
 
     root_logger.setLevel(logging.DEBUG)
 
-    file_handler = logging.FileHandler(f".logs/{strftime('%d-%m-%Y_%H-%M-%S', localtime())}.log")
+    file_handler = logging.FileHandler(
+        f"{out_dir}/.logs/{strftime('%d-%m-%Y_%H-%M-%S', localtime())}.log"
+    )
     file_handler.setFormatter(log_formatter)
     root_logger.addHandler(file_handler)
 
@@ -101,10 +121,15 @@ if __name__ == "__main__":
     rich_handler.addFilter(BenchmarkWhitelistFilter())
     root_logger.addHandler(rich_handler)
 
-    logging.getLogger("pynguin").setLevel(logging.WARNING)
+    logging.getLogger("pynguin").setLevel(logging.INFO)
     logging.getLogger("httpcore").setLevel(logging.WARNING)
     logging.getLogger("httpx").setLevel(logging.WARNING)
 
     _LOGGER.info("Running model benchmark")
     ModelBenchmark.benchmark.run()
-    CSV.export(ModelBenchmark.benchmark.results)
+    _LOGGER.debug("Benchmark results: %s", ModelBenchmark.benchmark.results)
+    CSV.export(ModelBenchmark.benchmark.results, out_dir / "results.csv")
+
+
+if __name__ == "__main__":
+    main()

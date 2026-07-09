@@ -1,0 +1,40 @@
+# Run with `docker compose up --abort-on-container-exit --exit-code-from benchmark` in this folder.
+
+services:
+  benchmark:
+    image: pynguin-benchmark
+    build:
+      context: ..
+      dockerfile: benchmark/Dockerfile
+    volumes:
+      - ${PWD}/out:/pynguin/results
+    depends_on:
+      ollama:
+        condition: service_healthy
+    environment:
+      - PYNGUIN_LLM_BASE_URL=http://ollama:11434
+
+
+  ollama:
+    image: ollama/ollama:latest
+    healthcheck:
+      test: ollama --version || exit 1
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    volumes:
+      - ollama:/root/.ollama  
+
+    # Comment / uncomment the following lines to enable / desable GPU support for Ollama
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: ${OLLAMA_GPU_DRIVER-nvidia}
+              count: ${OLLAMA_GPU_COUNT-1}
+              capabilities:
+                - gpu
+
+volumes:
+  ollama: {}

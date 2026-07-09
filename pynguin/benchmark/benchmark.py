@@ -21,7 +21,7 @@ from typing import Concatenate, ParamSpec, TypeVar
 from rich.console import Console, Group
 from rich.live import Live
 from rich.panel import Panel
-from rich.progress import BarColumn, Progress, SpinnerColumn, TaskProgressColumn, TextColumn
+from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn
 
 from pynguin.analyses.module import ModuleTestCluster, generate_test_cluster
 from pynguin.configuration import TypeInferenceStrategy
@@ -50,13 +50,6 @@ class Sample:
 
     def __str__(self) -> str:
         return f"Sample from module {self.module_name}"
-
-    def __repr__(self) -> str:
-        return textwrap.dedent(f"""Sample(
-            test_cluster={self.test_cluster!r},
-            module_name="{self.module_name}", 
-            module_root={self.module_root!r}, 
-            module_code={self.module_code!r})""")  # noqa: W291
 
 
 class Dataset:
@@ -142,7 +135,9 @@ class Dataset:
                         _LOGGER.debug("Skipped module %s", candidate_name)
                         continue
                     with self._prepend_sys_path(candidate_root):
-                        _LOGGER.debug("Generating test cluster for %s", candidate_name)
+                        _LOGGER.debug(
+                            "Generating test cluster for %s (%s)", candidate_name, candidate_root
+                        )
                         sample = Sample(
                             generate_test_cluster(candidate_name, type_inference_strategy),
                             candidate_name,
@@ -226,7 +221,14 @@ T = TypeVar("T", bound=BenchmarkExperiment)
 class BenchmarkSuite:
     """Runs benchmark experiments on a dataset and collects results."""
 
-    def __init__(self, experiments: list[T], dataset: Dataset, *, n_runs: int = 1) -> None:
+    def __init__(
+        self,
+        experiments: list[T],
+        dataset: Dataset,
+        *,
+        n_runs: int = 1,
+        max_samples: int | None = None,
+    ) -> None:
         """Instanciate a Benchmark suite.
 
         Args:
@@ -237,10 +239,14 @@ class BenchmarkSuite:
             n_runs (int, optional):
                 Number of runs.
                 Defaults to 1.
+            max_samples (int | None, optional):
+                Maximum number of samples to run.
+                Defaults to None.
         """
         self._experiments = experiments
         self._dataset = dataset
         self._n_runs = n_runs
+        self._max_samples = max_samples
         self._results: dict[Sample, dict[BenchmarkExperiment, list[BenchmarkExperimentResult]]] = {}
 
     def run(self) -> None:
@@ -260,11 +266,13 @@ class BenchmarkSuite:
         )
         with Live(Panel(Group(status, progress)), transient=True):
             for sample in self._dataset.get_samples():
+                if self._max_samples is not None and len(self._results) >= self._max_samples:
+                    break
                 status.update(f"Benchmarking on module {sample.module_name}")
                 sample_task = progress.add_task("Running experiments", total=len(self._experiments))
+                self._results[sample] = {}
 
                 for experiment in self._experiments:
-                    self._results[sample] = {}
                     if self._n_runs != 1:
                         experiment_task = progress.add_task(
                             "Experiment progress", total=self._n_runs
