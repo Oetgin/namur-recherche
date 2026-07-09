@@ -10,11 +10,16 @@
             "request": "launch",
             "module": "pynguin",
             "console": "integratedTerminal",
-            "args": "--module_name queue_example --project_path .. --output_path .. -v --create_coverage_report True --algorithm LLMOSA --provider OLLAMA --model_name qwen2.5-coder:1.5b --maximum_iterations 10 --call_llm_on_stall_detection True --call_llm_for_uncovered_targets True --max_plateau_len 5",
+            "args": "--module_name tab --project_path .. --output_path .. -v --create_coverage_report True --algorithm LLMOSA --provider OLLAMA --model_name qwen2.5-coder:1.5b --maximum_iterations 10 --call_llm_on_stall_detection True --call_llm_for_uncovered_targets True --max_plateau_len 5",
             "justMyCode": true,
             "env": {"PYNGUIN_DANGER_AWARE" : "1"},
             "cwd": "${workspaceFolder}/pynguin",
-            "python": "/home/theo/.cache/pypoetry/virtualenvs/pynguin-u_gZn74M-py3.10/bin/python",
+            "windows": {
+                "python": "${env:APPDATA}\\..\\Local\\pypoetry\\Cache\\virtualenvs\\pynguin-y8U48iha-py3.10\\Scripts\\python.exe", // Change pynguin-y8U48iha-py3.10 to the name the virtual environment
+            },
+            "linux": {
+                "python": "/~/.cache/pypoetry/virtualenvs/pynguin-u_gZn74M-py3.10/bin/python" // Change pynguin-u_gZn74M-py3.10 to the name the virtual environment
+            }
         },
             {
             "name": "Profile Pynguin with Arguments",
@@ -26,7 +31,12 @@
             "justMyCode": true,
             "env": {"PYNGUIN_DANGER_AWARE" : "1"},
             "cwd": "${workspaceFolder}/pynguin",
-            "python": "/home/theo/.cache/pypoetry/virtualenvs/pynguin-u_gZn74M-py3.10/bin/python",
+            "windows": {
+                "python": "${env:APPDATA}\\..\\Local\\pypoetry\\Cache\\virtualenvs\\pynguin-y8U48iha-py3.10\\Scripts\\python.exe", // Change pynguin-y8U48iha-py3.10 to the name the virtual environment
+            },
+            "linux": {
+                "python": "/~/.cache/pypoetry/virtualenvs/pynguin-u_gZn74M-py3.10/bin/python" // Change pynguin-u_gZn74M-py3.10 to the name the virtual environment
+            }
         },
         {
             "name": "Test Pynguin with Arguments",
@@ -38,7 +48,28 @@
             "justMyCode": true,
             "env": {"PYNGUIN_DANGER_AWARE" : "1"},
             "cwd": "${workspaceFolder}/pynguin",
-            "python": "/home/theo/.cache/pypoetry/virtualenvs/pynguin-u_gZn74M-py3.10/bin/python",
+            "windows": {
+                "python": "${env:APPDATA}\\..\\Local\\pypoetry\\Cache\\virtualenvs\\pynguin-y8U48iha-py3.10\\Scripts\\python.exe", // Change pynguin-y8U48iha-py3.10 to the name the virtual environment
+            },
+            "linux": {
+                "python": "/~/.cache/pypoetry/virtualenvs/pynguin-u_gZn74M-py3.10/bin/python" // Change pynguin-u_gZn74M-py3.10 to the name the virtual environment
+            }
+        },
+        {
+            "name": "Benchmark Pynguin",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/pynguin/benchmark/config.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "env": {"PYNGUIN_DANGER_AWARE" : "1"},
+            "cwd": "${workspaceFolder}",
+            "windows": {
+                "python": "${env:APPDATA}\\..\\Local\\pypoetry\\Cache\\virtualenvs\\pynguin-y8U48iha-py3.10\\Scripts\\python.exe", // Change pynguin-y8U48iha-py3.10 to the name the virtual environment
+            },
+            "linux": {
+                "python": "/~/.cache/pypoetry/virtualenvs/pynguin-u_gZn74M-py3.10/bin/python" // Change pynguin-u_gZn74M-py3.10 to the name the virtual environment
+            }
         }
     ]
 }

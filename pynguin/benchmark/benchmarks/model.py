@@ -7,6 +7,7 @@
 """LLM model benchmarking."""
 
 import logging
+import textwrap
 from typing import TYPE_CHECKING
 
 import ollama
@@ -30,6 +31,7 @@ from pynguin import configuration as config
 from pynguin.configuration import LLMProvider
 from pynguin.ga.algorithms.llmosalgorithm import LLMOSAAlgorithm
 from pynguin.slicer.statementslicingobserver import RemoteStatementSlicingObserver
+from pynguin.utils.api_key_resolver import get_llm_url
 
 if TYPE_CHECKING:
     from pynguin.ga.algorithms.generationalgorithm import GenerationAlgorithm
@@ -46,9 +48,9 @@ class ModelBenchmarkExperiment(BenchmarkExperiment):
         model: str,
         *,
         temperature: float | None = None,
-        only_llm: bool = False,
+        only_llm: bool = True,
     ) -> None:
-        """Benchark different AI models.
+        """Benchmark different AI models.
 
         Args:
             provider (LLMProvider): Model provider.
@@ -56,7 +58,7 @@ class ModelBenchmarkExperiment(BenchmarkExperiment):
             temperature (float | None, optional): Optional temperature parameter.
             only_llm (bool, optional): Only use LLM generated testcases.
                 If False, will also use the standard algorithm and only call the LLM on plateaus.
-                Defaults to False.
+                Defaults to True.
         """
         self.provider = provider
         self.model = model
@@ -64,11 +66,14 @@ class ModelBenchmarkExperiment(BenchmarkExperiment):
         self.only_llm = only_llm
 
     def setup(self):  # noqa: D102
+        _LOGGER.debug(
+            "Setting up model experiment (model: %s, llm_url: %s)", self.model, get_llm_url()
+        )
         if self.provider == LLMProvider.OLLAMA and not any(
-            model.model == self.model for model in ollama.Client().list().models
+            model.model == self.model for model in ollama.Client(host=get_llm_url()).list().models
         ):
             _LOGGER.info("Model %s not found. Pulling from Ollama...", self.model)
-            progress_response = ollama.Client().pull(self.model, stream=True)
+            progress_response = ollama.Client(host=get_llm_url()).pull(self.model, stream=True)
 
             pbar = Progress(
                 TextColumn("[progress.description]{task.description}"),
@@ -97,6 +102,7 @@ class ModelBenchmarkExperiment(BenchmarkExperiment):
     @measure_exec_time
     def run(self, sample: Sample) -> BenchmarkExperimentResult:  # noqa: D102
         _LOGGER.debug("Running model experiment (model : %s)", self.model)
+        _LOGGER.debug("Sample: %s", sample)
         try:
             test_cluster = sample.test_cluster
 
@@ -158,3 +164,11 @@ class ModelBenchmarkExperiment(BenchmarkExperiment):
 
     def __str__(self) -> str:
         return f"Model experiment ({self.model})"
+
+    def __repr__(self) -> str:
+        return textwrap.dedent(f"""ModelBenchmarkExperiment(
+            provider={self.provider!r},
+            model={self.model!r},
+            temperature={self.temperature!r},
+            only_llm={self.only_llm!r}
+        )""")

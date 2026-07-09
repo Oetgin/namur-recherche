@@ -69,6 +69,7 @@ setuptools = "^80.9.0"
 toml = "^0.10.2"
 psutil = "^7.1.1"
 rstr = "^3.2.2"
+ollama = { version = "^0.6.2", optional = true }
 openai = { version = "^1.72.0", optional = true }
 python-dotenv = { version = "^1.0.0", optional = true }
 numpy = { version = "^1.26.4", optional = true }
@@ -106,7 +107,6 @@ optional = true
 
 [tool.poetry.group.sutlibs.dependencies]
 pandas = "2.3"
-ollama = "^0.6.2"
 pyinstrument = "^5.1.2"
 pylint = "^4.0.6"
 progressbar = "^2.5"
@@ -116,10 +116,18 @@ matplotlib = "3.10.9"
 scikit-learn = "1.7.2"
 gym = "^0.26.2"
 progressbar33 = "^2.4"
-types-tqdm = "^4.68.0.20260608"
+
+[tool.poetry.group.benchmark]
+optional = true
+
+[tool.poetry.group.benchmark.dependencies]
+tqdm = "^4"
 pandas-stubs = "2.3.3.260113"
+types-tqdm = "^4.68.0.20260608"
+namex = "^0.1.0"
 
 [tool.poetry.extras]
+ollama = [ "ollama", "python-dotenv" ]
 openai = [ "openai", "python-dotenv" ]
 numpy = [ "numpy" ]
 typing = [ "mypy", "typing-extensions" ]
@@ -127,6 +135,7 @@ fandango-faker = [ "faker", "fandango-fuzzer", "xmltodict" ]
 
 [tool.poetry.scripts]
 pynguin = "pynguin.cli:main"
+benchmark = "benchmark.config:main"
 
 [tool.coverage.run]
 branch = true
@@ -305,7 +314,7 @@ skip_install = true
 allowlist_externals = ["make", "poetry"]
 commands_pre = [
   ["poetry", "env", "use", "{env_name}"],
-  ["poetry", "install", "--extras", "openai numpy fandango-faker"]
+  ["poetry", "install", "--all-extras", "--all-groups"],
 ]
 commands = [
   ["make", "check"],

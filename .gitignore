@@ -4,3 +4,5 @@
 *.lock
 *report
 results.*
+results
+.logs
