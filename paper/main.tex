@@ -1,0 +1,359 @@
+\documentclass{article}
+
+% Language setting
+% Replace `english' with e.g. `spanish' to change the document language
+\usepackage[english]{babel}
+
+% Set page size and margins
+% Replace `letterpaper' with `a4paper' for UK/EU standard size
+\usepackage[a4paper,top=2cm,bottom=2cm,left=3cm,right=3cm,marginparwidth=1.75cm]{geometry}
+
+
+% Useful packages
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{xparse} % Required for handling optional/multiple macro arguments cleanly
+\usepackage{float}
+\usepackage{pdfpages}
+\usepackage{caption}
+\usepackage{listings}
+\usepackage{minted}
+\usepackage{todonotes} \setlength{\marginparwidth}{2cm} 
+% \usepackage{enumitem}
+\usepackage{csquotes}
+\usepackage[backend=biber, style=numeric, sorting=none]{biblatex}
+\addbibresource{references.bib}
+
+
+% Macros
+% Research questions
+\newcounter{rqcnt} % Counter
+\renewcommand{\therqcnt}{RQ\arabic{rqcnt}} % Format the reference to 'RQn' instead of just 'n'
+\newcommand{\formatRQ}[2]{
+    \begin{quote}
+        \textbf{#1:} \textit{#2}
+    \end{quote}
+}
+\newcommand{\RQ}[2]{ % Register a new question
+~\refstepcounter{rqcnt}\label{rq:#1} % Increment and set target for \label, then save ref label
+    % Save the question text globally using a unique key name based on the ID
+    \expandafter\gdef\csname stored@rq@#1\endcsname{#2} % chktex 41
+    \formatRQ{\therqcnt}{#2}
+}
+\newcommand{\printRQ}[1]{ % Duplicate/reprint a stored question
+    % Retrieve the number using standard~\ref, and text via our global storage macro
+    \formatRQ{\ref{rq:#1}}{\csname stored@rq@#1\endcsname} % chktex 41
+}
+% Environments
+\newenvironment{code}{\captionsetup{type=listing}}{}
+
+
+% Settings
+% \setlength{\parskip}{\baselineskip}
+% \setlist[enumerate]{nosep}
+
+
+
+
+
+\title{Improving LLM-assisted automated test generation for Machine Learning in Python}
+\author{Théo \textsc{Ginguené}}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Your abstract. 
+\todo{Add abstract}
+\end{abstract}
+
+\tableofcontents
+
+\section{Introduction}
+Testing code is crucial to ensure its quality. Historically, this has been done manually, which can be tedious and time-consuming.
+To address this issue, automated test generation tools have been created. Many of them were first developed for Java, because of its widespread use in research and business, and its strong typing.
+One such example is Evosuite\cite{ESECFSE11}, which uses an evolutionary approach based on genetic algorithms.
+However, some specific fields of computer science like machine learning often use Python instead of Java. Using the same principles, Pynguin\cite{Lukasczyk_Pynguin_Automated_Unit_2022} was then developed to cover this gap in test generation tools for Python.
+The default algorithm these two tools use is called Dynamic Many-Objective Sorting Algorithm (DynaMOSA)\cite{7840029}. DynaMOSA has been shown to outperform its predecessors\cite{7840029}, but a new successor recently emerged.
+With the emergence of LLMs also appeared LLM-assisted test generation. Combining LLMs and traditional approaches such as DynaMOSA has been shown to improve code coverage further than each method individually, in a new algorithm---CodaMOSA\cite{10172800}. This algorithm has been adapted in Pynguin, through the name of LLMOSA.
+
+\todo{Complete intro}
+
+\subsection{Problem}
+Because of the random nature of genetic algorithms, DynaMOSA has trouble trouble generating tests for machine learning (ML) libraries, for example scikit-learn or numpy\cite{erni2024sbfttoolcompetition2024}. Some functions require complex data structures (\textit{e.g.} a pandas DataFrame with a column \texttt{col\_y} existing), which are hard to generate through evolution only, because that would require stumbling upon the required constraints randomly. LLMOSA seems like a promising alternative, because providing the code of the subject under test (SUT), an LLM can produce such data structures. 
+However, when trying to run LLMOSA on code oriented toward machine learning, a few problems occurred, making the LLM unable to generate tests.
+
+To combine the LLM and DynaMOSA approaches, Pynguin deserializes the generated code from the LLM (a sequence of characters) into a list of test case chromosomes, a format used by the DynaMOSA algorithm to evolve the test cases. This conversion (as described in figure~\ref{fig:parser_diagram}) operates in two phases.
+The rewriter first takes the LLM response, extracts code blocks and specifically Python functions named '\texttt{test\_\dots}', and transforms statements to make them easier to deserialize (\textit{e.g.} walrus expressions are transformed into regular assignments).
+The deserializer then converts the simplified code into Pynguin's classes.
+
+\begin{figure}[hbt!]
+    \centering
+    \includegraphics[width=0.5\linewidth]{assets/parser_diagram}
+    \caption{LLM test generation sequence}\label{fig:parser_diagram}
+\end{figure}
+
+Each step adds uncertainty and potential errors.
+This paper aims at solving these problems one by one, first explaining them, before solving them and evaluating the impact of these changes. Our goal is to improve Pynguin's LLMOSA algorithm, in particular---though not only---for machine learning applications.
+
+
+\subsection*{Contributions (?)}
+
+
+\subsection*{Outline (?)}
+
+
+
+\section{Background and related work}
+For an in depth understanding of search-based software testing (SBST), specificially for machine learning applications, we refer the reader to Chapter 2 of Lucas Berg's thesis\cite{Lucas_Berg_Improving_automated_unit_test_generation_for_machine_learning_libraries_using_structured_input_data_2024}.
+This paper has been written as a continuation of this thesis, and will focus on the improvements made to LLMOSA, and their evaluation, with the same goal of improving code coverage for machine learning applications.
+
+\section{Approach}
+Before trying to improve LLMOSA, the first step was trying to run it on a code sample.
+As our research is oriented toward machine learning, we wrote an example (listing~\ref{lst:tab}) using pandas\cite{The_pandas_development_team_pandas-dev_pandas_Pandas}, a popular library for data analysis.
+
+\begin{code}   
+\caption{Module under test (MUT)}\label{lst:tab}
+\begin{minted}[linenos, breaklines, frame=single]{python}
+import pandas as pd
+
+def process_df(df: pd.DataFrame) -> bool:
+    '''Applies different operations to a DataFrame, in place.'''
+    df.drop(columns=['col1'], inplace=True) # Requires col1 to exist
+    return df.empty
+\end{minted}
+\end{code}
+
+This sample has two different output to be tested, \texttt{True} and \texttt{False}. 
+The objective is to produce both compliant and non-compliant inputs to test this module. Non compliant outputs are relatively easy to generate, as any non DataFrame input will do. However, generating a compliant input is more difficult, as it requires a DataFrame with a column named \texttt{col1}, and another non empty column. This is an example of a function that is hard to test with DynaMOSA, but \textit{should} be easy to test with LLMOSA.
+
+To test this, we tried running both DynaMOSA and LLMOSA on this module, with the default configuration.
+However, running pynguin with LLMOSA required an OpenAI API key, which has the following drawbacks:
+
+\begin{enumerate}
+    \item Consistency: OpenAI can discontinue access to a specific model at any time, making it difficult to reproduce experiments. Open weights models can be downloaded, stored and used at any time for a better comparison and reproducibility.
+    \item Price: OpenAI's prices range from up to 0.40\$ per 1M output tokens for the cheapest `nano' models, and 180\$ per 1M output tokens for flagship models\cite{OpenAI_pricing}. When benchmarking or through intensive use, this can quickly add up to substantial expenses. These prices are also subject to change.
+\end{enumerate}
+
+\subsection{New providers}
+To reduce this dependency to an external provider, we decided to refactor the LLM logic and add support for a new provider, Ollama. This provider can be used to run open models\cite{Ollama} locally, solving the issues raised above.
+A configuration entry was added; \texttt{--provider}, taking as possible values the enum \texttt{LLMProvider}---currently \texttt{OPENAI} or \texttt{OLLAMA}.
+
+
+\subsection{Prompt engineering}
+Due to the constraints of the rewriter, we noticed that the LLM often failed to provide an appropriate structure. This was primarily due to the minimalist prompt (listing~\ref{lst:original_prompt}).
+
+\begin{code}
+\caption{Original prompt}\label{lst:original_prompt}    
+\begin{minted}[breaklines, frame=single]{text}
+Write unit tests for the following callables that Pynguin failed to cover:
+{callables_section}
+Module path: `{self.module_path}`
+Module source code: `{self.module_code}`
+\end{minted}
+\end{code}
+
+To try and formulate better guidance, we listed the requirements to satisfy for the rewriter to work:
+
+\begin{enumerate}
+    \item The answer should be inside a code block:\\
+        Pynguin uses the regex \verb!r"```python([\s\S]+?)(?:```|$)"! to extract the code block from the LLM response. If the answer is not inside a code block annotated with triple backticks and `python', it will not be parsed.
+        If no code block is found, the rewriter will return an empty list of test cases, which will make the algorithm fail to generate any test case.
+    \item Each function must be named '\texttt{test\_\dots}':\\
+        The rewriter specifically checks if the function name starts with '\texttt{test\_}'. If it does not, the function will be ignored and not parsed. It also has to either be top-level or inside a top-level class, but not inside another function or nested class.
+    \item Each function must have no arguments:\\
+        While the rewriter can handle functions with arguments, the deserializer cannot, due to the fact that Pynguin's test case representation does not support arguments. If a function has arguments, it will be ignored and not parsed. Without changing the whole test case representation, this requirement cannot be lifted.
+    \item Pytest features (\textit{e.g.} fixtures) are not supported:\\
+        Again, due to the limitations of Pynguin's test case representation, the deserializer cannot handle pytest features. Decorators in general are not rewritten, and will be ignored (except for \texttt{@pytest.mark.parametrize}, as explained below).
+    \item \dots
+\end{enumerate}
+
+\todo{Complete and explain why these requirements}
+
+We added a bit of context, and complementary instructions such as:
+\begin{itemize}
+    \item Not rewriting the SUT's code, for three main reasons: 
+        first, it would skew pynguin's code coverage results, as the tests would not run on the SUT's actual code but on the rewritten version; 
+        second, it would make the tests less maintainable, as they would have to be updated if the SUT changes; 
+        third, it saves tokens and run time, which is beneficial for the overall efficiency of the testing process.
+    \item Using a Chain-of-Thought (CoT) approach, which is a prompting technique that encourages the LLM to reason step by step. This can help the LLM to generate more accurate and relevant tests, as this method has been shown to improve the ability of large language models to perform complex reasoning\cite{wei2023chainofthoughtpromptingelicitsreasoning}.
+    \item Following the Arrange, Act, Assert pattern, which is a common pattern in unit testing. It helps to structure the tests and makes them easier to read and understand, which is useful for debugging and guides the LLM toward generating higher quality tests.
+\end{itemize}
+
+All these instructions were compiled into a new prompt (listing~\ref{lst:our_prompt}), with an emphasis on the fact that the functions should have no arguments, because this was the main cause of parsing failures, and an example of a valid test function.
+
+To help with running the same test with different values, we also added support for \texttt{pytest.\allowbreak{}parametrize}. We rewrite the decorated function as one function per parameter, with the parameter initialized at the start of the function body.
+
+\todo{Update prompt}
+\begin{code}
+\caption{Our prompt proposition}\label{lst:our_prompt}
+\begin{minted}[breaklines, frame=single]{text}
+You are writing tests to be used as seed for a SBST algorithm. Your goal is to improve as much as possible the coverage of the tests.
+Write unit tests for the following callables that Pynguin failed to cover:
+{callables_section}
+Module path: `{self.module_path}`
+Module source code: `{self.module_code}`
+You answer will be parsed for mutations, so here are the guidelines you need to follow:
+- Answer in a code block only using; one function for each test case, with NO ARGUMENTS, NO HELPER FUNCTIONS AND NO CLASSES.
+- If needed, instantiate vars in the body of the test func or use pytest.parametrize, but DO NOT USE ANY OTHER PYTEST FEATURE (e.g. DO NOT USE FIXTURES), as that will make the parsing fail.
+- Do not rewrite the SUT's code in the tests. If you want for example to call a function or instanciante a class, import it.
+- Don't explain what you do, just answer in simple, concise assertion tests, split in small functions, following the Arrange, Act, Assert pattern.
+
+Here are some examples; *NEVER DO*:
+def func_all_tests(param):
+  var0 = param
+  ...
+
+*INSTEAD DO*:
+from module_to_test import func
+def test_feat1():
+  var0 = func()
+  assert ...
+
+
+REMEMBER: NO ARGUMENTS IN YOUR TEST FUNCTIONS'
+\end{minted}
+\end{code}
+
+Naturally, the question that arises is the following: 
+\RQ{prompt}{Can our prompt improve the algorithm performance?}
+
+Our prompt uses more tokens than the original one, however it is more specific and provides more guidance to the LLM. It is therefore expected to improve the algorithm performance, but it is not guaranteed.
+We will try to find out and answer this question in section~\ref{sec:eval}.
+
+
+\todo{Add example of rewritten \texttt{pytest.\allowbreak{}parametrize}}
+
+\subsection{Adding imports}
+After adding the new prompt, we were able to consistently generate correct rewritten tests. When deserializing though, lots of statements got lost in the process: function calls, some asserts, attributes, some comparisons, \textit{etc}.
+
+To illustrate this, we show a sample of the rewritten output (listing~\ref{lst:rewritten_output}) and the deserializer result (listing~\ref{lst:deserializer_result}).
+
+\begin{code}
+\caption{Rewritten output (sample)}\label{lst:rewritten_output}    
+\begin{minted}[breaklines, linenos, frame=single]{python}
+def test_process_df_with_missing_values():
+    var_0 = 'Test for a DataFrame with missing values.'
+    var_1 = 'col1'
+    var_2 = 'col2'
+    var_3 = 1
+    var_4 = 2
+    var_5 = None
+    var_6 = [var_3, var_4, var_5]
+    var_7 = 3
+    var_8 = [var_3, var_4, var_7]
+    var_9 = {var_1: var_6, var_2: var_8}
+    df = pd.DataFrame(var_9)
+    var_10 = process_df(df)
+    var_11 = True
+    var_12 = var_10 is var_11
+    assert var_12
+\end{minted}
+\end{code}
+
+The deserializer result is missing many statements from the rewritten output, which is a problem for the algorithm's performance. The most important missing statements are the function calls, which are the main part of the test case. Without them, the test case is useless as it does not execute a single line of code from the SUT.
+
+\begin{code}
+\caption{Deserializer result}\label{lst:deserializer_result}    
+\begin{minted}[breaklines, linenos, frame=single]{py}
+def test_generated_function():
+    str_0 = 'Test for a DataFrame with missing values.'
+    str_1 = 'col1'
+    str_2 = 'col2'
+    int_0 = 1
+    int_1 = 2
+    none_type_0 = None
+    list_0 = [int_0, int_1, none_type_0]
+    int_2 = 3
+    list_1 = [int_0, int_1, int_2]
+    dict_0 = {str_1: list_0, str_2: list_1}
+    bool_0 = True
+\end{minted}
+\end{code}
+
+After further investigation, we figured that the main cause of parsing failures was the impossibility to resolve objects from the libraries used by the test suite, including from the MUT (\textit{e.g.} \texttt{pd.DataFrame}, \texttt{process\_df}). Each unparsed statement then in turn caused the parsing of the subsequent statements to fail.
+Two options were considered:
+\begin{enumerate}
+    \item\label{item:llm_imports} Gather the imports written by the LLM, import the corresponding libraries and search for matches in the imported objects.
+    \item\label{item:mut_imports} Search in the libraries imported from the module under test (MUT).
+\end{enumerate} 
+
+Option~\ref{item:llm_imports} makes sure that libraries explicitely cited by the LLM are imported, but has other implications, such as making sure that the package is installed, performance issues, and more unpredictable behavior.
+That is why we opted for option~\ref{item:mut_imports}. This choice is further justified by the fact that most of the time, it is not required to import libraries other than those used by the MUT. We still added the imports hinted by the LLM in the rewriter, both for debugging purposes and easing the implementation of option~\ref{item:llm_imports} if necessary.
+
+\subsection{Statement fixes}
+Even after adding the imports, even though the majority of statements were deserialized correctly, some still failed to be deserialized. We identified a few causes:
+
+\subsubsection{Asserts}
+Asserts were not added to the test case due to an incorrect configuration. If the assertion generator was not set to \texttt{AssertionGenerator.LLM}, the deserializer would not add asserts to the test case. However, the LLM was still generating asserts, which were then ignored by the deserializer. This was fixed by simply always adding asserts to the test case.
+
+\subsubsection{Unary not}
+Unary not statements (\textit{i.e.} \texttt{a = not b}) were not deserialized because the deserializer was not handling them. We added a special case checking for the not operator and creating the appropriate \texttt{ASTAssignStatement}. 
+This single change improves the deserializer success rate significantly because the LLM often uses the not operator in its generated code, especially when asserting that a boolean value is False (\textit{e.g.} \texttt{assert not df.empty}).
+
+\subsubsection{Equality between variable references}
+A problem in the implementation of the deserializer (when testing equality between variable references) was causing it to crash on some occurences, stopping completely the test generation. The problem was later found and a patch was added independently in the main branch of Pynguin by the maintainer\cite{VariableRefAST.structural_eq_fix}.
+
+\subsubsection{\texttt{x is y} (?)}
+
+
+\subsection{Compressing context}
+The fixed deserializer was able to parse the rewritten output correctly, but when testing LLMOSA on a large module, we ran into issues. The LLM was often unable to generate a proper response. Sometimes it would time out, while other times it would a response that was not parsable by the rewriter or deserializer or simply unusable.
+The run time also increased significantly, as the LLM had to process a lot of information.
+We identified that the main cause of this problem was the context size. The LLM was given too much information---the entire module code, which could be very large, and the list of callables to cover, which could also be large (sometimes the entire module).
+To solve this problem, we implemented a context compression algorithm.
+
+\todo{Implement and explain compression algorithm}
+\todo{Split query into multiple queries?}
+
+
+\section{Evaluation}\label{sec: eval}
+\todo{Evaluate prompt and other improvements}
+\subsection{Dataset}
+
+
+\subsection{Experiment setup}
+
+
+\subsection{Results}
+
+
+
+\RQ{approach}{Is our new generation approach able to improve code coverage?}
+\dots
+
+To answer~\ref{rq:approach} (\printRQ{approach}) \dots 
+
+\section{Discussion}
+\subsection{Findings}
+
+
+\subsection{\dots}
+
+
+\subsection{Threats to validity}
+
+
+
+\section{Conclusions}
+\subsection{Summary}
+
+
+\subsection{Future work}
+
+
+
+\phantomsection{}
+\section*{Acknowledgments}\label{sec:ack}
+\addcontentsline{toc}{section}{\nameref{sec:ack}}
+I would like to thank Xavier \textsc{Devroey} (my tutor) and Lucas \textsc{Berg} for providing valuable guidance during my internship. 
+
+
+
+\newpage
+\phantomsection{}  % Ensures hyperref links correctly to the references page
+\addcontentsline{toc}{section}{References}
+\printbibliography{}
+
+\end{document}

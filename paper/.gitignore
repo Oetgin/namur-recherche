@@ -1,0 +1,13 @@
+*.log
+*.xml
+*.aux
+*.out
+*.toc
+*.gz
+*.minted
+*.bcf
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+_minted
