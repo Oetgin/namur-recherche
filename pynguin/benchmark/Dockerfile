@@ -23,23 +23,6 @@ ENV POETRY_VERSION="1.8.4"
 
 WORKDIR /pynguin
 
-# Python shall not write the byte code to *.pyc files; they cannot be cached between
-# runs of the container anyway, hence we save the required time and resources for that
-ENV PYTHONDONTWRITEBYTECODE=1
-# Prevent Python from buffering output that is written to STDOUT/STDERR; this allows to
-# monitor the output in real time
-ENV PYTHONUNBUFFERED=1
-
-COPY . .
-
-RUN pip install poetry==$POETRY_VERSION 
-RUN poetry config virtualenvs.create false
-
-RUN apt-get update
-RUN apt-get install -y --no-install-recommends g++
-
-RUN poetry install --with sutlibs --all-extras
-
 # Set environment variables
 # Set the Pynguin version
 ENV PYNGUIN_VERSION="0.46.0.dev0"
@@ -58,9 +41,25 @@ ENV PYTHONUNBUFFERED=1
 # Disable random hash seeding for reproducible runs
 ENV PYTHONHASHSEED=0
 
-RUN apt-get install -y --no-install-recommends \
-    git \
-    python-tk
+RUN apt-get update
+RUN apt-get install -y --no-install-recommends g++
+RUN apt-get install -y --no-install-recommends git
+RUN apt-get install -y --no-install-recommends python-tk
+
+RUN pip install poetry==$POETRY_VERSION 
+RUN poetry config virtualenvs.create false
+
+COPY pyproject.toml .
+COPY README.md .
+
+RUN poetry install --all-extras --with sutlibs --with benchmark --no-root
+
+COPY . .
+
+RUN poetry lock
+RUN poetry install --all-extras --with sutlibs --with benchmark
+
+
 RUN rm -rf /var/lib/apt/lists/*
 
 ENTRYPOINT ["python", "benchmark/config.py"]

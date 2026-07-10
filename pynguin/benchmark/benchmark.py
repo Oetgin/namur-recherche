@@ -122,29 +122,37 @@ class Dataset:
             Iterator[Sample]: A sample in the dataset.
         """
         for module_path in self._get_projects_from_path(self._path):
-            if module_path.is_file():
-                module_root = module_path.parent
-                module_name = module_path.stem
-            else:
-                for candidate in module_path.rglob("*.py"):
-                    if not candidate.is_file():
-                        continue
-                    candidate_root = self._module_import_root(module_path, candidate)
-                    candidate_name = self._module_name(module_path, candidate)
-                    if any(module_name in candidate_name for module_name in ("setup", "__init__")):
-                        _LOGGER.debug("Skipped module %s", candidate_name)
-                        continue
-                    with self._prepend_sys_path(candidate_root):
-                        _LOGGER.debug(
-                            "Generating test cluster for %s (%s)", candidate_name, candidate_root
-                        )
-                        sample = Sample(
-                            generate_test_cluster(candidate_name, type_inference_strategy),
-                            candidate_name,
-                            candidate_root,
-                            candidate.read_text(encoding="utf-8"),
-                        )
-                        yield sample
+            try:
+                if module_path.is_file():
+                    module_root = module_path.parent
+                    module_name = module_path.stem
+                else:
+                    for candidate in module_path.rglob("*.py"):
+                        if not candidate.is_file():
+                            continue
+                        candidate_root = self._module_import_root(module_path, candidate)
+                        candidate_name = self._module_name(module_path, candidate)
+                        if any(
+                            module_name in candidate_name for module_name in ("setup", "__init__")
+                        ):
+                            _LOGGER.debug("Skipped module %s", candidate_name)
+                            continue
+                        with self._prepend_sys_path(candidate_root):
+                            _LOGGER.debug(
+                                "Generating test cluster for %s (%s)",
+                                candidate_name,
+                                candidate_root,
+                            )
+                            sample = Sample(
+                                generate_test_cluster(candidate_name, type_inference_strategy),
+                                candidate_name,
+                                candidate_root,
+                                candidate.read_text(encoding="utf-8"),
+                            )
+                            yield sample
+                    continue
+            except Exception:
+                _LOGGER.exception("Error generating test cluster for %s", module_path)
                 continue
 
             with self._prepend_sys_path(module_root):
