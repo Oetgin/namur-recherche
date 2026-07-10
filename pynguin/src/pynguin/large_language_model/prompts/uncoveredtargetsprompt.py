@@ -109,7 +109,7 @@ class UncoveredTargetsPrompt(Prompt):
             str: The compressed module code.
         """
         # TODO (Oetgin): Improve compression by including related functions and classes, not just
-        # the uncovered ones.
+        # the uncovered ones ?
         uncovered_names = {
             self._get_gao_name(gao)
             for gao in uncovered_callables
@@ -121,9 +121,9 @@ class UncoveredTargetsPrompt(Prompt):
         for node in ast.walk(module_ast):
             if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
                 if node.name in uncovered_names:
-                    compressed_module_lines.append(ast.unparse(node) + "\n")
+                    compressed_module_lines.append(ast.unparse(node) + "\n\n")
                 elif compressed_module_lines[-1].strip() != "# [...]":
-                    compressed_module_lines.append("# [...]\n")
+                    compressed_module_lines.append("# [...]\n\n")
 
         return textwrap.dedent("".join(compressed_module_lines))
 
