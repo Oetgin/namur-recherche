@@ -236,11 +236,14 @@ if OLLAMA_AVAILABLE:
             api_key: SecretStr | None = None,
             temperature: float = 0.2,
             system_prompt: str = OLLAMA_SYSTEM_PROMPT,
-            model: str = "qwen2.5-coder:3b",  # TODO (Oetgin) : Benchmark models
+            model: str = "qwen2.5-coder:3b",  # TODO (Oetgin): Benchmark models
         ) -> None:
             super().__init__(api_key, temperature, system_prompt)
             if api_key is None:
-                self.__client = ollama.Client()  # pyright: ignore[reportPossiblyUnboundVariable]
+                llm_url = get_llm_url()
+                if not llm_url:
+                    llm_url = "http://localhost:11434"
+                self.__client = ollama.Client(host=llm_url)  # pyright: ignore[reportPossiblyUnboundVariable]
             else:
                 llm_url = get_llm_url()
                 if not llm_url:
