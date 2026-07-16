@@ -49,9 +49,11 @@ RUN apt-get install -y --no-install-recommends python-tk
 RUN pip install poetry==$POETRY_VERSION 
 RUN poetry config virtualenvs.create false
 
-COPY pyproject.toml .
-COPY README.md .
+RUN touch README.md
 
+COPY pyproject.toml .
+
+RUN poetry lock
 RUN poetry install --all-extras --with sutlibs --with benchmark --no-root
 
 COPY . .

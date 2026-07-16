@@ -110,6 +110,20 @@ clean_docker:
 	@echo Removing docker $(IMAGE):$(VERSION) ...
 	docker rmi -f $(IMAGE):$(VERSION)
 
+.PHONY: docker_benchmark_run
+docker_benchmark_run:
+	@echo Running docker benchmark
+	cd benchmark && \
+	docker compose up --build --abort-on-container-exit --exit-code-from benchmark
+
+.PHONY: clean_docker_benchmark
+clean_docker_benchmark:
+	@echo Removing docker $(IMAGE)-benchmark:$(VERSION) ...
+	docker rmi -f $(IMAGE)-benchmark:$(VERSION)
+
+.PHONY: clean_docker_all
+clean_docker_all: clean_docker clean_docker_benchmark
+
 .PHONY: clean_build
 clean_build:
 	rm -rf build/
@@ -125,7 +139,7 @@ clean_build:
 	find . -name "*.pyc" -type f | xargs rm -rf {};
 
 .PHONY: clean
-clean: clean_build clean_docker
+clean: clean_build clean_docker_all
 
 PYVERSIONS = 3.10 3.11 3.12 3.13 3.14
 
