@@ -1,21 +1,23 @@
 {
-    "python.analysis.extraPaths": [
-        "./pynguin/src"
-    ],
-    "python-envs.defaultEnvManager": "ms-python.python:system",
-    "conventionalCommits.scopes": [
-        "LLM",
-        "Tests",
-        "Benchmark",
-        "Paper"
-    ],
-    "python.testing.unittestEnabled": false,
-    "python.testing.pytestEnabled": true,
-    "python.testing.cwd": "${workspaceFolder}/pynguin",
-    "todo-tree.tree.showBadges": true,
-    "better-todo-tree.tree.showBadges": true,
-    "makefile.makefilePath": "pynguin/Makefile",
-    "python.analysis.exclude": [
-        "**/samples/github"
-    ]
+  "better-todo-tree.tree.showBadges": true,
+  "conventionalCommits.scopes": [
+    "LLM",
+    "Tests",
+    "Benchmark",
+    "Paper"
+  ],
+  "makefile.makefilePath": "pynguin/Makefile",
+  "python-envs.defaultEnvManager": "ms-python.python:system",
+  "python.analysis.exclude": [
+    "**/samples/github",
+    "**/node_modules",
+    "**/__pycache__",
+    "**/.*"
+  ],
+  "python.analysis.extraPaths": [
+    "./pynguin/src"
+  ],
+  "python.testing.cwd": "${workspaceFolder}/pynguin",
+  "python.testing.pytestEnabled": true,
+  "python.testing.unittestEnabled": false
 }
