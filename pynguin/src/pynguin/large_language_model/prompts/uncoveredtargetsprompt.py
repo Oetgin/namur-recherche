@@ -108,24 +108,82 @@ class UncoveredTargetsPrompt(Prompt):
         Returns:
             str: The compressed module code.
         """
-        # TODO (Oetgin): Improve compression by including related functions and classes, not just
-        # the uncovered ones ?
         uncovered_names = {
             self._get_gao_name(gao)
             for gao in uncovered_callables
             if self._get_gao_name(gao) is not None
         }
         module_ast = ast.parse(module_code)
-        compressed_module_lines = []
 
-        for node in ast.walk(module_ast):
-            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
-                if node.name in uncovered_names:
-                    compressed_module_lines.append(ast.unparse(node) + "\n\n")
-                elif compressed_module_lines[-1].strip() != "# [...]":
-                    compressed_module_lines.append("# [...]\n\n")
+        return self._compress_node(module_ast, uncovered_names)
 
-        return textwrap.dedent("".join(compressed_module_lines))
+    def _compress_node(self, node: ast.AST, uncovered_names: set[str | None]) -> str:
+        """Recursively compresses the AST nodes based on uncovered names.
+
+        Args:
+            node (ast.AST): Node to compress.
+            uncovered_names (set[str  |  None]): Name of the uncovered callables.
+
+        Returns:
+            str: The compressed code representing the node.
+        """
+        ELLIPSIS = "# [...]\n"  # noqa: N806
+
+        def _last_line_is_ellipsis(s: str) -> bool:
+            lines = s.strip().splitlines()
+            return lines[-1].strip() == ELLIPSIS.strip()
+
+        compressed = ""
+        if (
+            isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+            and node.name in uncovered_names
+        ):
+            # TODO (Oetgin): Consider including related functions and classes, not just the
+            # uncovered ones
+            return ast.unparse(node) + "\n"  # Nested functions and classes are included.
+
+        if isinstance(node, ast.ClassDef):
+            for child in node.body:
+                if not (
+                    isinstance(child, ast.FunctionDef) and child.name == "__init__"
+                ):  # Skip constructor, as it is handled separately
+                    compressed_child = self._compress_node(child, uncovered_names)
+                    if compressed_child and compressed_child != ELLIPSIS:
+                        compressed += compressed_child
+                    elif not compressed or not _last_line_is_ellipsis(compressed):
+                        compressed += ELLIPSIS
+
+            class_signature = f"class {node.name}:\n"
+
+            if node.name in uncovered_names:
+                class_constructor = next(
+                    (
+                        child
+                        for child in node.body
+                        if isinstance(child, ast.FunctionDef) and child.name == "__init__"
+                    ),
+                    None,
+                )
+                if class_constructor:
+                    class_constructor_code = ast.unparse(class_constructor) + "\n"
+                    return (
+                        class_signature
+                        + textwrap.indent(class_constructor_code, "    ")
+                        + textwrap.indent(compressed, "    ")
+                    )
+                return class_signature + compressed
+            if compressed and compressed != ELLIPSIS:
+                return class_signature + compressed
+
+        if isinstance(node, ast.Module):
+            for child in node.body:
+                compressed_child = self._compress_node(child, uncovered_names)
+                if compressed_child and compressed_child != ELLIPSIS:
+                    compressed += compressed_child
+                elif not compressed or not _last_line_is_ellipsis(compressed):
+                    compressed += ELLIPSIS
+
+        return compressed
 
     def build_prompt(self) -> str:
         """Builds the prompt message."""
