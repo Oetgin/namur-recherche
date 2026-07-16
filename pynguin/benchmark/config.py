@@ -6,13 +6,20 @@
 #
 """Benchmark configurations."""
 # TODO (Oetgin): Refactor, config should not be used to run the benchmark, but only to configure it.
-# ruff: noqa: ERA001
 
 import logging
 import sys
+from enum import Enum
 from pathlib import Path
 from time import localtime, strftime
 from typing import ClassVar
+
+from typing_extensions import override
+
+from pynguin.large_language_model.prompts.uncoveredtargetsprompt import UncoveredTargetsPrompt
+from pynguin.utils.generic.genericaccessibleobject import (
+    GenericCallableAccessibleObject,
+)
 
 if __package__ in {None, ""}:
     _PACKAGE_ROOT = Path(__file__).resolve().parent.parent
@@ -23,10 +30,39 @@ from rich.logging import RichHandler
 
 from benchmark.benchmark import BenchmarkSuite, Dataset
 from benchmark.benchmarks.model import ModelBenchmarkExperiment
+from benchmark.benchmarks.prompt import PromptBenchmarkExperiment
 from benchmark.export import CSV
 from pynguin.configuration import LLMProvider
 
 _LOGGER = logging.getLogger(__name__)
+
+
+DATASET_RELATIVE_PATHS = [
+    "Tabular-data-generation/src/_ctgan/transformer.py",
+    "Tabular-data-generation/src/_ctgan/synthesizer.py",
+    "Tabular-data-generation/src/_ForestDiffusion/diffusion_with_trees_class.py",
+    "scikit-learn/sklearn/preprocessing/_data.py",
+    "scikit-learn/sklearn/utils/validation.py",
+    "scikit-learn/sklearn/pipeline.py",
+    "tensorflow/tensorflow/python/util/nest.py",
+    "tensorflow/tensorflow/python/util/dispatch.py",
+    "tensorflow/tensorflow/python/util/variable_utils.py",
+    "tensorflow/tensorflow/python/util/object_identity.py",
+    "transformers/src/transformers/tokenization_utils_base.py",
+    "transformers/src/transformers/pipelines/text_generation.py",
+    "pytorch/torch/_numpy/_util.py",
+    "pytorch/torch/_numpy/_funcs.py",
+    "pytorch/torch/_numpy/_ufuncs.py",
+    "pytorch/torch/_numpy/_normalizations.py",
+    "pytorch/torch/_numpy/_ndarray.py",
+    "pytorch/torch/_numpy/_getlimits.py",
+    "vllm/vllm/v1/structured_output/request.py",
+    "vllm/vllm/v1/spec_decode/utils.py",
+]
+
+_DATASET_ROOT = Path(__file__).resolve().parent / "samples" / "github"
+
+DATASET = Dataset(*(_DATASET_ROOT / relative_path for relative_path in DATASET_RELATIVE_PATHS))
 
 
 class ModelBenchmark:
@@ -37,53 +73,115 @@ class ModelBenchmark:
         "qwen2_5_coder__0_5b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "qwen2.5-coder:0.5b"),
         "qwen2_5_coder__1_5b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "qwen2.5-coder:1.5b"),
         "qwen2_5_coder__3b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "qwen2.5-coder:3b"),
-        # "qwen2_5_coder__7b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "qwen2.5-coder:7b"),
-        # "qwen2_5__0_5b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "qwen2.5:0.5b"),
-        # "qwen2_5__1_5b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "qwen2.5:1.5b"),
-        # "qwen2_5__3b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "qwen2.5:3b"),
-        # "qwen2_5__7b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "qwen2.5:7b"),
-        # "qwen3__0_6b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "qwen3:0.6b"),
-        # "qwen3__1_7b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "qwen3:1.7b"),
-        # "qwen3__4b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "qwen3:4b"),
-        # "qwen3_5__0_8b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "qwen3.5:0.8b"),
-        # "qwen3_5__2b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "qwen3.5:2b"),
-        # "qwen3_5__4b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "qwen3.5:4b"),
+        "qwen2_5_coder__7b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "qwen2.5-coder:7b"),
+        "qwen2_5__0_5b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "qwen2.5:0.5b"),
+        "qwen2_5__1_5b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "qwen2.5:1.5b"),
+        "qwen2_5__3b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "qwen2.5:3b"),
+        "qwen2_5__7b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "qwen2.5:7b"),
+        "qwen3__0_6b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "qwen3:0.6b"),
+        "qwen3__1_7b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "qwen3:1.7b"),
+        "qwen3__4b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "qwen3:4b"),
+        "qwen3_5__0_8b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "qwen3.5:0.8b"),
+        "qwen3_5__2b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "qwen3.5:2b"),
+        "qwen3_5__4b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "qwen3.5:4b"),
         # Codellama / Codegemma
-        # "codellama__7b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "codellama:7b"),
-        # "codegemma__2b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "codegemma:2b"),
-        # "codegemma__7b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "codegemma:7b"),
+        "codellama__7b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "codellama:7b"),
+        "codegemma__2b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "codegemma:2b"),
+        "codegemma__7b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "codegemma:7b"),
         # Gemma
         "gemma4__e2b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "gemma4:e2b"),
-        # "gemma4__e4b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "gemma4:e4b"),
+        "gemma4__e4b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "gemma4:e4b"),
         # Olmo
-        # "olmo_3__7b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "olmo-3:7b"),
+        "olmo_3__7b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "olmo-3:7b"),
         # LFM
-        # "lfm2_5__8b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "lfm2.5:8b"),
+        "lfm2_5__8b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "lfm2.5:8b"),
         # Phi
-        # "phi4_mini__3_8b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "phi4-mini:3.8b"),
-        # "phi4_mini_reasoning__3_8b": ModelBenchmarkExperiment(
-        #     LLMProvider.OLLAMA, "phi4-mini-reasoning:3.8b"
-        # ),
+        "phi4_mini__3_8b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "phi4-mini:3.8b"),
+        "phi4_mini_reasoning__3_8b": ModelBenchmarkExperiment(
+            LLMProvider.OLLAMA, "phi4-mini-reasoning:3.8b"
+        ),
         # Deepseek
-        # "deepseek_coder__1_3b": ModelBenchmarkExperiment(
-        #     LLMProvider.OLLAMA, "deepseek-coder:1.3b"
-        # ),
-        # "deepseek_coder__6_7b": ModelBenchmarkExperiment(
-        #     LLMProvider.OLLAMA, "deepseek-coder:6.7b"
-        # ),
-        # "deepseek_r1__1_5b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "deepseek-r1:1.5b"),
-        # "deepseek_r1__7b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "deepseek-r1:7b"),
+        "deepseek_coder__1_3b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "deepseek-coder:1.3b"),
+        "deepseek_coder__6_7b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "deepseek-coder:6.7b"),
+        "deepseek_r1__1_5b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "deepseek-r1:1.5b"),
+        "deepseek_r1__7b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "deepseek-r1:7b"),
     }
 
-    experiments: ClassVar[list] = list(_MODELS.values())
+    _TO_RUN: ClassVar[set[str]] = {
+        "qwen2_5_coder__0_5b",
+        "qwen2_5_coder__1_5b",
+        "qwen2_5_coder__3b",
+        "gemma4__e2b",
+    }
 
-    dataset = Dataset(Path(__file__).resolve().parent / "samples")
+    experiments: ClassVar[list] = []
+    for name, experiment in _MODELS.items():
+        if name in _TO_RUN:
+            experiments.append(experiment)
 
-    benchmark = BenchmarkSuite(experiments, dataset, n_runs=3, max_samples=5)
+    benchmark = BenchmarkSuite(experiments, DATASET, n_runs=3, max_samples=5)
+
+
+class PromptBenchmark:
+    """Configuration for benchmarking different prompts."""
+
+    class DefaultPrompt(UncoveredTargetsPrompt):
+        """Default prompt implementation."""
+
+        def __init__(
+            self,
+            callables: list[GenericCallableAccessibleObject],
+            module_code: str,
+            module_path: str,
+        ):
+            """Initializes the prompt.
+
+            Args:
+                callables (list[GenericCallableAccessibleObject]): List of
+                    uncovered callables.
+                module_path (str): Path to the module.
+                module_code (str): Source code of the module.
+            """
+            super().__init__(callables, module_code, module_path)
+
+        @override
+        def build_prompt(self) -> str:
+            """Builds the prompt message."""
+            callables_list = self.build_callables_prompt_section()
+            callables_section = "\n".join(callables_list)
+
+            return (
+                f"Write unit tests for the following callables that "
+                f" Pynguin failed to cover:\n"
+                f"{callables_section}\n"
+                f"Module path: `{self.module_path}`\n"
+                f"Module source code: `{self.module_code}`"
+            )
+
+    _PROMPTS: ClassVar[dict] = {
+        "default": PromptBenchmarkExperiment(DefaultPrompt),
+        "ours": PromptBenchmarkExperiment(UncoveredTargetsPrompt),
+    }
+
+    _TO_RUN: ClassVar[set[str]] = {"default", "ours"}
+
+    experiments: ClassVar[list] = []
+    for name, experiment in _PROMPTS.items():
+        if name in _TO_RUN:
+            experiments.append(experiment)
+
+    benchmark = BenchmarkSuite(experiments, DATASET, n_runs=3, max_samples=5)
 
 
 def main() -> None:
     """Main function to run configured benchmarks."""
+
+    class ExperimentType(Enum):
+        MODEL = "model"
+        PROMPT = "prompt"
+
+    to_run: list[ExperimentType] = [ExperimentType.PROMPT]
+
     out_dir = Path("results")
     out_dir.mkdir(parents=True, exist_ok=True)
     out_dir.joinpath(".logs").mkdir(parents=True, exist_ok=True)
@@ -125,10 +223,17 @@ def main() -> None:
     logging.getLogger("httpcore").setLevel(logging.WARNING)
     logging.getLogger("httpx").setLevel(logging.WARNING)
 
-    _LOGGER.info("Running model benchmark")
-    ModelBenchmark.benchmark.run()
-    _LOGGER.debug("Benchmark results: %s", ModelBenchmark.benchmark.results)
-    CSV.export(ModelBenchmark.benchmark.results, out_dir / "results.csv")
+    if ExperimentType.MODEL in to_run:
+        _LOGGER.info("Running model benchmark")
+        ModelBenchmark.benchmark.run()
+        _LOGGER.debug("Benchmark results: %s", ModelBenchmark.benchmark.results)
+        CSV.export(ModelBenchmark.benchmark.results, out_dir / "results.csv")
+
+    if ExperimentType.PROMPT in to_run:
+        _LOGGER.info("Running prompt benchmark")
+        PromptBenchmark.benchmark.run()
+        _LOGGER.debug("Benchmark results: %s", PromptBenchmark.benchmark.results)
+        CSV.export(PromptBenchmark.benchmark.results, out_dir / "prompt_results.csv")
 
 
 if __name__ == "__main__":

@@ -13,5 +13,9 @@
     "python.testing.pytestEnabled": true,
     "python.testing.cwd": "${workspaceFolder}/pynguin",
     "todo-tree.tree.showBadges": true,
-    "better-todo-tree.tree.showBadges": true
+    "better-todo-tree.tree.showBadges": true,
+    "makefile.makefilePath": "pynguin/Makefile",
+    "python.analysis.exclude": [
+        "**/samples/github"
+    ]
 }

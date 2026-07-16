@@ -4,5 +4,6 @@
 *.lock
 *report
 results.*
+*_results.csv
 results
 .logs

@@ -7,15 +7,19 @@
 """Base for all benchmarks."""
 
 import abc
+import importlib.machinery
+import importlib.metadata
+import importlib.util
 import datetime
 import logging
 import sys
 import textwrap
 import time
-from collections.abc import Callable, Iterator
+from collections.abc import Callable, Iterator, Sequence
 from contextlib import contextmanager
 from functools import wraps
 from pathlib import Path
+from types import ModuleType
 from typing import Concatenate, ParamSpec, TypeVar
 
 from rich.console import Console, Group
@@ -23,7 +27,12 @@ from rich.live import Live
 from rich.panel import Panel
 from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn
 
-from pynguin.analyses.module import ModuleTestCluster, generate_test_cluster
+from pynguin.analyses.module import (
+    ModuleTestCluster,
+    _ModuleParseResult,
+    analyse_module,
+    read_module_ast,
+)
 from pynguin.configuration import TypeInferenceStrategy
 
 _LOGGER = logging.getLogger(__name__)
@@ -55,13 +64,20 @@ class Sample:
 class Dataset:
     """Manages a set of code samples to run experiments on."""
 
-    def __init__(self, path: Path) -> None:
+    def __init__(self, path: Path, *args) -> None:
         """Creates a dataset.
 
         Args:
-            path (Path): Path of the dataset, including projects and modules.
+            path (Path): The path to the dataset, including projects and modules.
+                If a path is a directory, all subdirectories and Python files will be included
+                recursively.
+                If a path is a Python file, it will be included as a sample.
+            *args: Additional paths to include in the dataset.
+                Non :class:`Path` arguments will be ignored.
         """
-        self._path = path
+        paths: list[Path] = [path]
+        paths.extend(arg for arg in args if isinstance(arg, Path))
+        self._paths = paths
 
     @classmethod
     def _is_project_root(cls, path: Path) -> bool:
@@ -94,6 +110,15 @@ class Dataset:
         return project_path
 
     @staticmethod
+    def _module_root_for_file(module_path: Path) -> Path:
+        module_root = module_path.parent
+        last_package_root = None
+        while (module_root / "__init__.py").exists() and module_root.parent != module_root:
+            last_package_root = module_root
+            module_root = module_root.parent
+        return module_root if last_package_root is not None else module_path.parent
+
+    @staticmethod
     def _module_name(module_root: Path, module_path: Path) -> str:
         relative_path = module_path.relative_to(module_root)
         relative_path = relative_path.with_suffix("")
@@ -109,6 +134,131 @@ class Dataset:
         finally:
             del sys.path[0]
 
+    @staticmethod
+    def _load_module_from_file(module_name: str, module_path: Path) -> ModuleType:
+        package_names: list[str] = []
+        package_parts: list[str] = []
+        for part in module_name.split(".")[:-1]:
+            package_parts.append(part)
+            package_names.append(".".join(package_parts))
+        for index, package_name in enumerate(package_names):
+            package_path = module_path.parents[len(package_names) - index - 1]
+            init_path = package_path / "__init__.py"
+            package = sys.modules.get(package_name)
+            if package is None:
+                package = ModuleType(package_name)
+                package.__path__ = [str(package_path)]  # type: ignore[attr-defined]
+                package.__package__ = package_name
+                package.__spec__ = importlib.machinery.ModuleSpec(
+                    package_name,
+                    loader=None,
+                    is_package=True,
+                )
+                package.__spec__.submodule_search_locations = [str(package_path)]
+                if "." not in package_name:
+                    try:
+                        package.__version__ = importlib.metadata.version(package_name)
+                    except importlib.metadata.PackageNotFoundError:
+                        pass
+                sys.modules[package_name] = package
+            if init_path.is_file() and not getattr(package, "__benchmark_initialized__", False):
+                spec = importlib.util.spec_from_file_location(
+                    package_name,
+                    init_path,
+                    submodule_search_locations=[str(package_path)],
+                )
+                if spec is not None and spec.loader is not None:
+                    package.__spec__ = spec
+                    try:
+                        spec.loader.exec_module(package)
+                    except Exception as error:  # noqa: BLE001
+                        _LOGGER.debug(
+                            "Could not fully initialize package %s from %s (%s)",
+                            package_name,
+                            init_path,
+                            error,
+                        )
+                    finally:
+                        package.__benchmark_initialized__ = True  # type: ignore[attr-defined]
+
+        spec = importlib.util.spec_from_file_location(module_name, module_path)
+        if spec is None or spec.loader is None:
+            raise ImportError(f"Could not create import specification for {module_name}")
+
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[module_name] = module
+        spec.loader.exec_module(module)
+        return module
+
+    @classmethod
+    def _parse_module_from_file(cls, module_name: str, module_path: Path) -> _ModuleParseResult:
+        module = cls._load_module_from_file(module_name, module_path)
+        syntax_tree: None | object = None
+        linenos = -1
+        try:
+            syntax_tree, source_code = read_module_ast(str(module_path), module_name)
+        except (
+            TypeError,
+            OSError,
+            Exception,
+        ) as error:
+            _LOGGER.debug(
+                f"Could not retrieve source code for module {module_name} ({error}). "
+                f"Cannot derive syntax tree to allow Pynguin using more precise analysis."
+            )
+        else:
+            linenos = len(source_code.splitlines())
+
+        return _ModuleParseResult(
+            linenos=linenos,
+            module_name=module_name,
+            module=module,
+            syntax_tree=syntax_tree,
+        )
+
+    def _get_samples_from_module_path(
+        self,
+        module_path: Path,
+        type_inference_strategy: TypeInferenceStrategy,
+    ) -> Iterator[Sample]:
+        if module_path.is_file():
+            module_root = self._module_root_for_file(module_path)
+            module_name = self._module_name(module_root, module_path)
+            yield Sample(
+                analyse_module(
+                    self._parse_module_from_file(module_name, module_path),
+                    type_inference_strategy,
+                ),
+                module_name,
+                module_root,
+                module_path.read_text(encoding="utf-8"),
+            )
+            return
+
+        for candidate in module_path.rglob("*.py"):
+            if not candidate.is_file():
+                continue
+            candidate_root = self._module_import_root(module_path, candidate)
+            candidate_name = self._module_name(module_path, candidate)
+            if any(module_name in candidate_name for module_name in ("setup", "__init__")):
+                _LOGGER.debug("Skipped module %s", candidate_name)
+                continue
+            with self._prepend_sys_path(candidate_root):
+                _LOGGER.debug(
+                    "Generating test cluster for %s (%s)",
+                    candidate_name,
+                    candidate_root,
+                )
+                yield Sample(
+                    analyse_module(
+                        self._parse_module_from_file(candidate_name, candidate),
+                        type_inference_strategy,
+                    ),
+                    candidate_name,
+                    candidate_root,
+                    candidate.read_text(encoding="utf-8"),
+                )
+
     def get_samples(
         self, type_inference_strategy: TypeInferenceStrategy = TypeInferenceStrategy.TYPE_HINTS
     ) -> Iterator[Sample]:
@@ -121,51 +271,33 @@ class Dataset:
         Yields:
             Iterator[Sample]: A sample in the dataset.
         """
-        for module_path in self._get_projects_from_path(self._path):
-            try:
-                if module_path.is_file():
-                    module_root = module_path.parent
-                    module_name = module_path.stem
-                else:
-                    for candidate in module_path.rglob("*.py"):
-                        if not candidate.is_file():
-                            continue
-                        candidate_root = self._module_import_root(module_path, candidate)
-                        candidate_name = self._module_name(module_path, candidate)
-                        if any(
-                            module_name in candidate_name for module_name in ("setup", "__init__")
-                        ):
-                            _LOGGER.debug("Skipped module %s", candidate_name)
-                            continue
-                        with self._prepend_sys_path(candidate_root):
-                            _LOGGER.debug(
-                                "Generating test cluster for %s (%s)",
-                                candidate_name,
-                                candidate_root,
-                            )
-                            sample = Sample(
-                                generate_test_cluster(candidate_name, type_inference_strategy),
-                                candidate_name,
-                                candidate_root,
-                                candidate.read_text(encoding="utf-8"),
-                            )
-                            yield sample
+        for path in self._paths:
+            for module_path in self._get_projects_from_path(path):
+                try:
+                    yield from self._get_samples_from_module_path(
+                        module_path, type_inference_strategy
+                    )
                     continue
-            except Exception:
-                _LOGGER.exception("Error generating test cluster for %s", module_path)
-                continue
-
-            with self._prepend_sys_path(module_root):
-                sample = Sample(
-                    generate_test_cluster(module_name, type_inference_strategy),
-                    module_name,
-                    module_root,
-                    module_path.read_text(encoding="utf-8"),
-                )
-                yield sample
+                except ModuleNotFoundError as error:
+                    _LOGGER.warning(
+                        "Skipping %s because a dependency is missing: %s",
+                        module_path,
+                        error,
+                    )
+                    continue
+                except ImportError as error:
+                    _LOGGER.warning(
+                        "Skipping %s because it could not be imported: %s",
+                        module_path,
+                        error,
+                    )
+                    continue
+                except Exception:
+                    _LOGGER.exception("Error generating test cluster for %s", module_path)
+                    continue
 
     def __repr__(self) -> str:
-        return f"Dataset(path={self._path})"
+        return f"Dataset(path={self._paths})"
 
 
 class BenchmarkExperimentResult:
