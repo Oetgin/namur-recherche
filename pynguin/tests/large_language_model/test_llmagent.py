@@ -141,7 +141,7 @@ def test_ollama_model_query_success(mocker):
 
     mock_client = mocker.Mock()
     mock_client.chat.return_value = mock_response
-    mocker.patch("pynguin.large_language_model.llmagent.Ollama", return_value=mock_client)
+    mocker.patch("pynguin.utils.llm.Ollama", return_value=mock_client)
 
     model = LLMAgent()
     model.clear_cache()
@@ -166,7 +166,7 @@ def test_ollama_model_query_cache(mocker):
 
     mock_client = mocker.Mock()
     mock_client.chat.return_value = mock_response
-    mocker.patch("pynguin.large_language_model.llmagent.Ollama", return_value=mock_client)
+    mocker.patch("pynguin.utils.llm.Ollama", return_value=mock_client)
 
     model = LLMAgent()
     model.clear_cache()

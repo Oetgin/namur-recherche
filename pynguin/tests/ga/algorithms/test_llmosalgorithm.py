@@ -36,7 +36,7 @@ def llmosa_algorithm():
     """Returns a LLMOSA algorithm instance with mocked components."""
     with (
         patch("pynguin.utils.api_key_resolver.require_api_key") as mock_key,
-        patch("pynguin.large_language_model.llmagent.OpenAI"),
+        patch("pynguin.utils.llm.OpenAI"),
         patch("pynguin.large_language_model.llmagent.LLMAgent", autospec=True) as mock_llm_agent,
     ):
         mock_key.return_value = MagicMock()
