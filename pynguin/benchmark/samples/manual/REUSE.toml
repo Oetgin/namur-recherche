@@ -1,0 +1,8 @@
+version = 1
+
+# Everything in this folder and subfolders is under the MIT License
+[[annotations]]
+path = "**"
+precedence = "override"
+SPDX-FileCopyrightText = "2019–2026 Pynguin Contributors"
+SPDX-License-Identifier = "MIT"
