@@ -1,0 +1,8 @@
+version = 1
+
+# In the out folder, if no copyright is present, use MIT License
+[[annotations]]
+path = "out/**"
+precedence = "closest"
+SPDX-FileCopyrightText = "2019–2026 Pynguin Contributors"
+SPDX-License-Identifier = "MIT"

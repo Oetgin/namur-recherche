@@ -1,0 +1,25 @@
+# SPDX-FileCopyrightText: 2019–2026 Pynguin Contributors
+#
+# SPDX-License-Identifier: MIT
+
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: pynguin-benchmarks
+spec:
+  template:
+    spec:
+      containers:
+      - name: prompt-benchmark
+        image: pynguin-benchmark:latest
+        command: ["--to-run", "prompt"]
+      - name: model-benchmark
+        image: pynguin-benchmark:latest
+        command: ["--to-run", "model"]
+      - name: classic-ours-benchmark
+        image: pynguin-benchmark:latest
+        command: ["--to-run", "classic"]
+      - name: classic-base-benchmark
+        image: pynguin-base-benchmark:latest
+        command: ["--to-run", "classic"]
+      restartPolicy: Never

@@ -1,0 +1,8 @@
+version = 1
+
+# Every exported .tar file are under the MIT license
+[[annotations]]
+path = "pynguin*benchmark*.tar"
+precedence = "override"
+SPDX-FileCopyrightText = "2019–2026 Pynguin Contributors"
+SPDX-License-Identifier = "MIT"
