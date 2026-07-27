@@ -11,3 +11,5 @@
 *.fdb_latexmk
 *.fls
 _minted
+_minted-*
+*(busy)
