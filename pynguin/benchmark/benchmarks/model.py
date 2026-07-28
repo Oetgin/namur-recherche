@@ -105,6 +105,12 @@ class ModelBenchmarkExperiment(BenchmarkExperiment):
         _LOGGER.debug("Sample: %s", sample)
         try:
             test_cluster = sample.test_cluster
+            llm_mode = "full" if self.only_llm else "llm"
+            report_dir = (
+                f"results/benchmark_result/{sample.module_name}_{self.model}_ours_"
+                f"{llm_mode}_{config.configuration.seeding.seed}"
+            )
+            config.configuration.statistics_output.report_dir = report_dir
 
             config.configuration.large_language_model.provider = self.provider
             config.configuration.large_language_model.model_name = self.model
@@ -113,6 +119,11 @@ class ModelBenchmarkExperiment(BenchmarkExperiment):
 
             config.configuration.algorithm = config.Algorithm.LLMOSA
             config.configuration.module_name = sample.module_name
+
+            if not self.only_llm:
+                config.configuration.large_language_model.call_llm_for_uncovered_targets = True
+                config.configuration.large_language_model.call_llm_on_stall_detection = True
+                config.configuration.large_language_model.max_plateau_len = 5
 
             if (setup_result := pynguin.generator._setup_and_check()) is None:  # noqa: SLF001
                 _LOGGER.error("Setup failed")

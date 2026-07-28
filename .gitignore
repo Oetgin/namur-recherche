@@ -7,7 +7,9 @@
 .hypothesis
 *.lock
 *report
+*result
 results.*
 *_results.csv
 results
 .logs
+*.tar

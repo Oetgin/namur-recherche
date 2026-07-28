@@ -5,6 +5,7 @@
 #  SPDX-License-Identifier: MIT
 #
 """Benchmark configurations."""
+
 # TODO (Oetgin): Refactor, config should not be used to run the benchmark, but only to configure it.
 
 import logging
@@ -14,6 +15,7 @@ from pathlib import Path
 from time import localtime, strftime
 from typing import ClassVar
 
+import simple_parsing
 from typing_extensions import override
 
 from pynguin.large_language_model.prompts.uncoveredtargetsprompt import UncoveredTargetsPrompt
@@ -38,26 +40,30 @@ _LOGGER = logging.getLogger(__name__)
 
 
 DATASET_RELATIVE_PATHS = [
-    "Tabular-data-generation/src/_ctgan/transformer.py",
-    "Tabular-data-generation/src/_ctgan/synthesizer.py",
+    # "scikit-learn/sklearn/preprocessing/_data.py",  # scikit-learn requires a building step
+    # "scikit-learn/sklearn/utils/validation.py",  # scikit-learn requires a building step
+    # "scikit-learn/sklearn/pipeline.py",  # scikit-learn requires a building step
+    # "tensorflow/tensorflow/python/util/nest.py",  # tensorflow requires a building step
+    # "tensorflow/tensorflow/python/util/dispatch.py",  # tensorflow requires a building step
+    # "tensorflow/tensorflow/python/util/variable_utils.py",  # tensorflow requires a building step
+    # "tensorflow/tensorflow/python/util/object_identity.py",  # tensorflow requires a building step
+    # "vllm/vllm/v1/structured_output/request.py",  # circular import error on WSL  # noqa: ERA001
+    # "vllm/vllm/v1/spec_decode/utils.py",  # circular import error on WSL  # noqa: ERA001
+    "pytorch/torch/_numpy/_ndarray.py",
+    "pytorch/torch/_numpy/_getlimits.py",
+    "pytorch/torch/nn/attention/bias.py",
+    "pytorch/torch/nn/attention/flex_attention.py",
     "Tabular-data-generation/src/_ForestDiffusion/diffusion_with_trees_class.py",
-    "scikit-learn/sklearn/preprocessing/_data.py",
-    "scikit-learn/sklearn/utils/validation.py",
-    "scikit-learn/sklearn/pipeline.py",
-    "tensorflow/tensorflow/python/util/nest.py",
-    "tensorflow/tensorflow/python/util/dispatch.py",
-    "tensorflow/tensorflow/python/util/variable_utils.py",
-    "tensorflow/tensorflow/python/util/object_identity.py",
+    "Tabular-data-generation/src/tabgan/adversarial_model.py",
+    "Tabular-data-generation/src/_ctgan/transformer.py",
     "transformers/src/transformers/tokenization_utils_base.py",
     "transformers/src/transformers/pipelines/text_generation.py",
+    "transformers/src/transformers/data/metrics/squad_metrics.py",
+    "pytorch/torch/nn/modules/rnn.py",
     "pytorch/torch/_numpy/_util.py",
     "pytorch/torch/_numpy/_funcs.py",
     "pytorch/torch/_numpy/_ufuncs.py",
     "pytorch/torch/_numpy/_normalizations.py",
-    "pytorch/torch/_numpy/_ndarray.py",
-    "pytorch/torch/_numpy/_getlimits.py",
-    "vllm/vllm/v1/structured_output/request.py",
-    "vllm/vllm/v1/spec_decode/utils.py",
 ]
 
 _DATASET_ROOT = Path(__file__).resolve().parent / "samples" / "github"
@@ -119,7 +125,7 @@ class ModelBenchmark:
         if name in _TO_RUN:
             experiments.append(experiment)
 
-    benchmark = BenchmarkSuite(experiments, DATASET, n_runs=3, max_samples=5)
+    benchmark = BenchmarkSuite(experiments, DATASET, n_runs=30, max_samples=10)
 
 
 class PromptBenchmark:
@@ -170,17 +176,58 @@ class PromptBenchmark:
         if name in _TO_RUN:
             experiments.append(experiment)
 
-    benchmark = BenchmarkSuite(experiments, DATASET, n_runs=3, max_samples=5)
+    benchmark = BenchmarkSuite(experiments, DATASET, n_runs=30, max_samples=15)
 
 
-def main() -> None:
-    """Main function to run configured benchmarks."""
+class ClassicBenchmark:
+    """Configuration for benchmarking classic Pynguin.
+
+    Runs a model experiment with a single model.
+    """
+
+    benchmark = BenchmarkSuite(
+        [ModelBenchmarkExperiment(LLMProvider.OLLAMA, "qwen2.5-coder:0.5b", only_llm=False)],
+        DATASET,
+        n_runs=30,
+        max_samples=15,
+    )
+
+
+def _create_argument_parser() -> simple_parsing.ArgumentParser:
+    parser = simple_parsing.ArgumentParser(
+        add_option_string_dash_variants=simple_parsing.DashVariant.UNDERSCORE_AND_DASH,
+        description="Benchmarking Pynguin.",
+    )
+    parser.add_argument(
+        "--to-run",
+        nargs="+",
+        choices=["model", "prompt", "classic"],
+        default=["prompt", "classic"],
+        help="Which benchmarks to run. Default: ['prompt', 'classic']",
+    )
+    return parser
+
+
+def main(argv: list[str] | None = None) -> None:
+    """Main function to run configured benchmarks.
+
+    Args:
+        argv: List of command-line arguments. If None, sys.argv is used.
+    """
+    if argv is None:
+        argv = sys.argv
+    if not argv[0].startswith("-"):
+        argv = argv[1:]
+
+    argument_parser = _create_argument_parser()
+    parsed = argument_parser.parse_args(argv)
 
     class ExperimentType(Enum):
         MODEL = "model"
         PROMPT = "prompt"
+        CLASSIC = "classic"
 
-    to_run: list[ExperimentType] = [ExperimentType.PROMPT]
+    to_run = {ExperimentType(arg) for arg in parsed.to_run}
 
     out_dir = Path("results")
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -223,11 +270,11 @@ def main() -> None:
     logging.getLogger("httpcore").setLevel(logging.WARNING)
     logging.getLogger("httpx").setLevel(logging.WARNING)
 
-    if ExperimentType.MODEL in to_run:
-        _LOGGER.info("Running model benchmark")
-        ModelBenchmark.benchmark.run()
-        _LOGGER.debug("Benchmark results: %s", ModelBenchmark.benchmark.results)
-        CSV.export(ModelBenchmark.benchmark.results, out_dir / "results.csv")
+    if ExperimentType.CLASSIC in to_run:
+        _LOGGER.info("Running classic benchmark")
+        ClassicBenchmark.benchmark.run()
+        _LOGGER.debug("Benchmark results: %s", ClassicBenchmark.benchmark.results)
+        CSV.export(ClassicBenchmark.benchmark.results, out_dir / "classic_results.csv")
 
     if ExperimentType.PROMPT in to_run:
         _LOGGER.info("Running prompt benchmark")
@@ -235,6 +282,12 @@ def main() -> None:
         _LOGGER.debug("Benchmark results: %s", PromptBenchmark.benchmark.results)
         CSV.export(PromptBenchmark.benchmark.results, out_dir / "prompt_results.csv")
 
+    if ExperimentType.MODEL in to_run:
+        _LOGGER.info("Running model benchmark")
+        ModelBenchmark.benchmark.run()
+        _LOGGER.debug("Benchmark results: %s", ModelBenchmark.benchmark.results)
+        CSV.export(ModelBenchmark.benchmark.results, out_dir / "model_results.csv")
+
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv)

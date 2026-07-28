@@ -98,6 +98,15 @@ class PromptBenchmarkExperiment(BenchmarkExperiment):
         _LOGGER.debug("Sample: %s", sample)
         try:
             test_cluster = sample.test_cluster
+            config.configuration.statistics_output.report_dir = (
+                f"results/benchmark_result/"
+                f"{sample.module_name}_{self.prompt.__name__}_ours_"
+                f"{config.configuration.seeding.seed}"
+            )
+
+            config.configuration.large_language_model.call_llm_for_uncovered_targets = True
+            config.configuration.large_language_model.call_llm_on_stall_detection = True
+            config.configuration.large_language_model.max_plateau_len = 5
 
             config.configuration.large_language_model.provider = self.provider
             config.configuration.large_language_model.model_name = self.model
@@ -155,7 +164,7 @@ class PromptBenchmarkExperiment(BenchmarkExperiment):
         Returns:
             A list of `TestCaseChromosome` objects derived from the LLM query results.
         """
-        solutions_test_suite = algorithm.create_test_suite(algorithm._archive.solutions)  # noqa: SLF001
+        solutions_test_suite = algorithm.create_test_suite(algorithm._archive.solutions)  # noqa: SLF001 # fmt: skip
 
         def coverage_in_range(start_line: int, end_line: int) -> tuple[int, int]:
             """Calculate the total and covered coverage points for a given line range.
