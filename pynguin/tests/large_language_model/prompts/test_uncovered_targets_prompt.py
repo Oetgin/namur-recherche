@@ -95,19 +95,6 @@ def test_skips_unknown_callable_type(module_info):
     assert result == []
 
 
-# TODO (Oetgin): Should we compress the module code if it is too large?
-"""
-def test_compress_large_func(module_info):
-    large_code = "def foo():\n" + "    pass\n" * 2000
-    callables = [make_generic_function("foo")]
-    prompt = UncoveredTargetsPrompt(callables, large_code, module_info["path"])
-    result = prompt.build_prompt()
-
-    assert "Module source code: `" in result
-    assert len(result) < len(large_code)  # Ensure the code was compressed
-"""
-
-
 def test_compress_lots_of_callables(module_info):
     callables = [make_generic_function(f"foo{i}") for i in range(100)]
     code = "\n".join(f"def foo{i}(): pass" for i in range(100))

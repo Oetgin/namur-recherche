@@ -464,6 +464,16 @@ def test_create_assert_stmt(assertion_code, deserializer):
     assert deserializer.create_assert_stmt(assert_node) is not None
 
 
+def test_equality_assignment(deserializer):
+    assign_node = ast.parse("x = y == z").body[0]
+    deserializer._ref_dict = {
+        "y": MagicMock(spec=vr.VariableReference),
+        "z": MagicMock(spec=vr.VariableReference),
+    }
+
+    assert deserializer.add_assign_stmt(assign_node) is True
+
+
 def test_add_assign_stmt_unary_not_operation(deserializer):
     deserializer._ref_dict = {"x": MagicMock(spec=vr.VariableReference)}
     assign_node = ast.parse("y = not x").body[0]
