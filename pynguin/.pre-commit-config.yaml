@@ -29,8 +29,11 @@ repos:
     rev: 2.1.2
     hooks:
       - id: poetry-check
+        args: ["-C", "./pynguin"]
       - id: poetry-lock
+        args: ["-C", "./pynguin"]
       - id: poetry-install
+        args: ["-C", "./pynguin"]
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.11.4

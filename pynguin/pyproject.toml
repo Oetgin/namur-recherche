@@ -127,6 +127,9 @@ python-dateutil = "^2.9.0.post0"
 xgboost = "=2.0.0"
 be-great = "^0.0.14"
 torch = "2.10"
+regex = "2025.10.22"
+onnx-ir = "0.1.8"
+dask = {extras = ["distributed"], version = "^2026.7.1"}
 
 [tool.poetry.group.benchmark]
 optional = true
@@ -170,6 +173,7 @@ directory = "cov_html"
 [tool.mypy]
 files = "src"
 mypy_path = "src"
+exclude_gitignore = true
 namespace_packages = true
 explicit_package_bases = true
 show_error_codes = true
