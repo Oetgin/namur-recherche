@@ -117,22 +117,61 @@ class UncoveredTargetsPrompt(Prompt):
 
         return self._compress_node(module_ast, uncovered_names)
 
+    ELLIPSIS = "\n# [...]\n\n"
+
+    def _last_line_is_ellipsis(self, s: str) -> bool:
+        lines = s.strip().splitlines()
+        return lines[-1].strip() == UncoveredTargetsPrompt.ELLIPSIS.strip()
+
+    def _compress_class_node(
+        self, class_node: ast.ClassDef, uncovered_names: set[str | None]
+    ) -> str:
+        compressed = ""
+
+        for child in class_node.body:
+            if not (
+                isinstance(child, ast.FunctionDef) and child.name == "__init__"
+            ):  # Skip constructor, as it is handled separately
+                compressed_child = self._compress_node(child, uncovered_names)
+                if compressed_child and compressed_child != UncoveredTargetsPrompt.ELLIPSIS:
+                    compressed += compressed_child
+                elif not compressed or not self._last_line_is_ellipsis(compressed):
+                    compressed += UncoveredTargetsPrompt.ELLIPSIS
+
+        class_signature = f"class {class_node.name}:\n"
+
+        if class_node.name in uncovered_names:
+            class_constructor = next(
+                (
+                    child
+                    for child in class_node.body
+                    if isinstance(child, ast.FunctionDef) and child.name == "__init__"
+                ),
+                None,
+            )
+            if class_constructor:
+                class_constructor_code = ast.unparse(class_constructor) + "\n"
+                return (
+                    class_signature
+                    + textwrap.indent(class_constructor_code, "    ")
+                    + textwrap.indent(compressed, "    ")
+                )
+            return class_signature + compressed
+        if compressed and compressed != UncoveredTargetsPrompt.ELLIPSIS:
+            return class_signature + compressed
+
+        return compressed
+
     def _compress_node(self, node: ast.AST, uncovered_names: set[str | None]) -> str:
         """Recursively compresses the AST nodes based on uncovered names.
 
         Args:
             node (ast.AST): Node to compress.
-            uncovered_names (set[str  |  None]): Name of the uncovered callables.
+            uncovered_names (set[str | None]): Name of the uncovered callables.
 
         Returns:
             str: The compressed code representing the node.
         """
-        ELLIPSIS = "# [...]\n"  # noqa: N806
-
-        def _last_line_is_ellipsis(s: str) -> bool:
-            lines = s.strip().splitlines()
-            return lines[-1].strip() == ELLIPSIS.strip()
-
         compressed = ""
         if (
             isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
@@ -143,45 +182,15 @@ class UncoveredTargetsPrompt(Prompt):
             return ast.unparse(node) + "\n"  # Nested functions and classes are included.
 
         if isinstance(node, ast.ClassDef):
-            for child in node.body:
-                if not (
-                    isinstance(child, ast.FunctionDef) and child.name == "__init__"
-                ):  # Skip constructor, as it is handled separately
-                    compressed_child = self._compress_node(child, uncovered_names)
-                    if compressed_child and compressed_child != ELLIPSIS:
-                        compressed += compressed_child
-                    elif not compressed or not _last_line_is_ellipsis(compressed):
-                        compressed += ELLIPSIS
-
-            class_signature = f"class {node.name}:\n"
-
-            if node.name in uncovered_names:
-                class_constructor = next(
-                    (
-                        child
-                        for child in node.body
-                        if isinstance(child, ast.FunctionDef) and child.name == "__init__"
-                    ),
-                    None,
-                )
-                if class_constructor:
-                    class_constructor_code = ast.unparse(class_constructor) + "\n"
-                    return (
-                        class_signature
-                        + textwrap.indent(class_constructor_code, "    ")
-                        + textwrap.indent(compressed, "    ")
-                    )
-                return class_signature + compressed
-            if compressed and compressed != ELLIPSIS:
-                return class_signature + compressed
+            compressed = self._compress_class_node(node, uncovered_names)
 
         if isinstance(node, ast.Module):
             for child in node.body:
                 compressed_child = self._compress_node(child, uncovered_names)
-                if compressed_child and compressed_child != ELLIPSIS:
+                if compressed_child and compressed_child != UncoveredTargetsPrompt.ELLIPSIS:
                     compressed += compressed_child
-                elif not compressed or not _last_line_is_ellipsis(compressed):
-                    compressed += ELLIPSIS
+                elif not compressed or not self._last_line_is_ellipsis(compressed):
+                    compressed += UncoveredTargetsPrompt.ELLIPSIS
 
         return compressed
 
@@ -210,7 +219,7 @@ You answer will be parsed for mutations, so here are the guidelines you need to 
 - Answer in a code block only using; one function for each test case, with NO ARGUMENTS, NO HELPER FUNCTIONS AND NO CLASSES.
 - If needed, instantiate vars in the body of the test func or use pytest.parametrize, but DO NOT USE ANY OTHER PYTEST FEATURE (e.g. DO NOT USE FIXTURES), as that will make the parsing fail.
 - Do not rewrite the SUT's code in the tests. If you want for example to call a function or instanciante a class, import it.
-- After a reasoning step by step, answer in simple, concise assertion tests, split in small functions. Follow the Arrange, Act, Assert pattern.
+- Without explaining, answer in simple, concise assertion tests, split in small functions. Follow the Arrange, Act, Assert pattern.
 
 Here are some examples; *NEVER DO*:
 def func_all_tests(param):
