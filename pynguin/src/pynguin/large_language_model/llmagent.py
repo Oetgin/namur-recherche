@@ -352,7 +352,7 @@ class LLMAgent:
         Raises:
             ValueError: If no Python code block is found in the LLM output.
         """
-        python_markdown = r"```python([\s\S]+?)(?:```|$)"
+        python_markdown = r"```py(?:thon)?([\s\S]+?)(?:```|$)"
         if llm_output:
             code_blocks = re.findall(python_markdown, llm_output)
             if not code_blocks:
