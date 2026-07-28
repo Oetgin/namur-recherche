@@ -1787,11 +1787,19 @@ def __analyse_included_functions(
         if current in seen_functions:
             continue
         seen_functions.add(current)
+
+        try:
+            module_tree = parse_results[current.__module__].syntax_tree
+        except (
+            ModuleNotFoundError
+        ):  # pybind11 functions reference modules that are not found, we skip them
+            module_tree = None
+
         __analyse_function(
             func_name=current.__qualname__,
             func=current,
             type_inference_provider=type_inference_provider,
-            module_tree=parse_results[current.__module__].syntax_tree,
+            module_tree=module_tree,
             test_cluster=test_cluster,
             add_to_test=current.__module__ == root_module_name,
         )
