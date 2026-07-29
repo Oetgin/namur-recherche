@@ -15,25 +15,25 @@ spec:
         volumeMounts:
           - name: prompt-benchmark-results
             mountPath: /pynguin/results
-        command: ["--to-run", "prompt"]
+        args: ["--to-run=prompt"]
       - name: model-benchmark
         image: ghcr.io/oetgin/pynguin-benchmark:latest
         volumeMounts:
           - name: model-benchmark-results
             mountPath: /pynguin/results
-        command: ["--to-run", "model"]
+        args: ["--to-run=model"]
       - name: classic-ours-benchmark
         image: ghcr.io/oetgin/pynguin-benchmark:latest
         volumeMounts:
           - name: classic-ours-benchmark-results
             mountPath: /pynguin/results
-        command: ["--to-run", "classic"]
+        args: ["--to-run=classic"]
       - name: classic-base-benchmark
         image: ghcr.io/oetgin/pynguin-base-benchmark:latest
         volumeMounts:
           - name: classic-base-benchmark-results
             mountPath: /pynguin/results
-        command: ["--to-run", "classic"]
+        args: ["--to-run=classic"]
       volumes:
         - name: prompt-benchmark-results
           persistentVolumeClaim:

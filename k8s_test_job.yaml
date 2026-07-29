@@ -15,7 +15,7 @@ spec:
         volumeMounts:
           - name: test-benchmark-results
             mountPath: /pynguin/results
-        command: ["--to-run", "classic"]
+        args: ["--to-run=classic"]
       volumes:
         - name: test-benchmark-results
           persistentVolumeClaim:
