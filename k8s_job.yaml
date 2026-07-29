@@ -12,28 +12,40 @@ spec:
       containers:
       - name: prompt-benchmark
         image: ghcr.io/oetgin/pynguin-benchmark:latest
+        args: ["--to-run=prompt"]
+        env:
+          - name: PYNGUIN_LLM_BASE_URL
+            value: "http://ollama.info.unamur.be"
         volumeMounts:
           - name: prompt-benchmark-results
             mountPath: /pynguin/results
-        args: ["--to-run=prompt"]
       - name: model-benchmark
         image: ghcr.io/oetgin/pynguin-benchmark:latest
+        args: ["--to-run=model"]
+        env:
+          - name: PYNGUIN_LLM_BASE_URL
+            value: "http://ollama.info.unamur.be"
         volumeMounts:
           - name: model-benchmark-results
             mountPath: /pynguin/results
-        args: ["--to-run=model"]
       - name: classic-ours-benchmark
+        args: ["--to-run=classic"]
+        env:
+          - name: PYNGUIN_LLM_BASE_URL
+            value: "http://ollama.info.unamur.be"
         image: ghcr.io/oetgin/pynguin-benchmark:latest
         volumeMounts:
           - name: classic-ours-benchmark-results
             mountPath: /pynguin/results
-        args: ["--to-run=classic"]
       - name: classic-base-benchmark
         image: ghcr.io/oetgin/pynguin-base-benchmark:latest
+        args: ["--to-run=classic"]
+        env:
+          - name: PYNGUIN_LLM_BASE_URL
+            value: "http://ollama.info.unamur.be"
         volumeMounts:
           - name: classic-base-benchmark-results
             mountPath: /pynguin/results
-        args: ["--to-run=classic"]
       volumes:
         - name: prompt-benchmark-results
           persistentVolumeClaim:

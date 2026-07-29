@@ -12,10 +12,13 @@ spec:
       containers:
       - name: test-benchmark
         image: ghcr.io/oetgin/pynguin-benchmark-test:latest
+        args: ["--to-run=classic"]
+        env:
+          - name: PYNGUIN_LLM_BASE_URL
+            value: "http://ollama.info.unamur.be"
         volumeMounts:
           - name: test-benchmark-results
             mountPath: /pynguin/results
-        args: ["--to-run=classic"]
       volumes:
         - name: test-benchmark-results
           persistentVolumeClaim:
