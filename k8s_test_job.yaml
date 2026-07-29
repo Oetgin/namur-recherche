@@ -1,0 +1,25 @@
+# SPDX-FileCopyrightText: 2019–2026 Pynguin Contributors
+#
+# SPDX-License-Identifier: MIT
+
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: pynguin-benchmarks
+spec:
+  template:
+    spec:
+      containers:
+      - name: test-benchmark
+        image: ghcr.io/oetgin/pynguin-benchmark-test:latest
+        volumeMounts:
+          - name: test-benchmark-results
+            mountPath: /pynguin/results
+        command: ["--to-run", "classic"]
+      volumes:
+        - name: test-benchmark-results
+          persistentVolumeClaim:
+            claimName: pvc-lberg
+      restartPolicy: Never
+      imagePullSecrets:
+        - name: theo-ghcr-secret

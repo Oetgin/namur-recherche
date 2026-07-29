@@ -13,3 +13,4 @@ results.*
 results
 .logs
 *.tar
+pynguin.yaml

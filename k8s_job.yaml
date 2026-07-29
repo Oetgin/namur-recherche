@@ -11,15 +11,42 @@ spec:
     spec:
       containers:
       - name: prompt-benchmark
-        image: pynguin-benchmark:latest
+        image: ghcr.io/oetgin/pynguin-benchmark:latest
+        volumeMounts:
+          - name: prompt-benchmark-results
+            mountPath: /pynguin/results
         command: ["--to-run", "prompt"]
       - name: model-benchmark
-        image: pynguin-benchmark:latest
+        image: ghcr.io/oetgin/pynguin-benchmark:latest
+        volumeMounts:
+          - name: model-benchmark-results
+            mountPath: /pynguin/results
         command: ["--to-run", "model"]
       - name: classic-ours-benchmark
-        image: pynguin-benchmark:latest
+        image: ghcr.io/oetgin/pynguin-benchmark:latest
+        volumeMounts:
+          - name: classic-ours-benchmark-results
+            mountPath: /pynguin/results
         command: ["--to-run", "classic"]
       - name: classic-base-benchmark
-        image: pynguin-base-benchmark:latest
+        image: ghcr.io/oetgin/pynguin-base-benchmark:latest
+        volumeMounts:
+          - name: classic-base-benchmark-results
+            mountPath: /pynguin/results
         command: ["--to-run", "classic"]
+      volumes:
+        - name: prompt-benchmark-results
+          persistentVolumeClaim:
+            claimName: pvc-lberg
+        - name: model-benchmark-results
+          persistentVolumeClaim:
+            claimName: pvc-lberg
+        - name: classic-ours-benchmark-results
+          persistentVolumeClaim:
+            claimName: pvc-lberg
+        - name: classic-base-benchmark-results
+          persistentVolumeClaim:
+            claimName: pvc-lberg
       restartPolicy: Never
+      imagePullSecrets:
+        - name: theo-ghcr-secret
