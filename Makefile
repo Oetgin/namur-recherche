@@ -13,7 +13,7 @@ build_docker_benchmarks:
 	docker build \
 	  -t $(IMAGE)-benchmark:$(VERSION) \
 	  -t $(IMAGE)-benchmark:latest \
-	  -t ghcr.io/$(USER)/$(IMAGE)-benchmark:latest
+	  -t ghcr.io/$(USER)/$(IMAGE)-benchmark:latest \
 	  . \
 	  -f ./benchmark/Dockerfile
 	@echo Building docker $(IMAGE)-base-benchmark:$(VERSION) ...
@@ -21,9 +21,7 @@ build_docker_benchmarks:
 	docker build \
 	  -t $(IMAGE)-base-benchmark:$(VERSION) \
 	  -t $(IMAGE)-base-benchmark:latest \
-	  -t ghcr.io/$(USER)/$(IMAGE)-base-benchmark:latest
-	  . \
-	  -f ./benchmark/Dockerfile
+	  -t ghcr.io/$(USER)/$(IMAGE)-base-benchmark:latest \
 	  . \
 	  -f ./benchmark/Dockerfile
 
