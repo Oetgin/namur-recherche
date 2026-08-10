@@ -48,3 +48,9 @@ export_docker_benchmarks: build_docker_benchmarks
 	@echo Exporting docker benchmark containers to tar files
 	docker save $(IMAGE)-benchmark:$(VERSION) > $(IMAGE)-benchmark-$(VERSION).tar
 	docker save $(IMAGE)-base-benchmark:$(VERSION) > $(IMAGE)-base-benchmark-$(VERSION).tar
+
+.PHONY: push_docker_benchmarks
+push_docker_benchmarks: build_docker_benchmarks
+	@echo Pushing docker benchmark containers to ghcr.io
+	docker push ghcr.io/$(USER)/$(IMAGE)-benchmark:latest
+	docker push ghcr.io/$(USER)/$(IMAGE)-base-benchmark:latest

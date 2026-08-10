@@ -167,6 +167,8 @@ class ModelBenchmarkExperiment(BenchmarkExperiment):
                 algorithm._archive.solutions  # noqa: SLF001
             ).get_coverage()
 
+            _LOGGER.info("Model %s experiment completed, coverage=%s", self.model, coverage_after)
+
             return BenchmarkExperimentResult(success=True, score=coverage_after)
 
         except Exception:

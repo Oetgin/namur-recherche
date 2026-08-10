@@ -190,7 +190,10 @@ class Dataset:
                         module_root,
                         module_path.read_text(encoding="utf-8"),
                     )
-            except ModuleNotFoundError:
+            except (ModuleNotFoundError, ImportError) as e:
+                if isinstance(e, ModuleNotFoundError) and e.name != module_name:
+                    _LOGGER.exception("Module not found for %s: %s", module_path, e)
+                    continue
                 module_root = module_root.parent
                 module_name = Dataset._module_name(module_root, module_path)
                 _LOGGER.debug(
