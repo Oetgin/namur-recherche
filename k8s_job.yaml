@@ -17,7 +17,7 @@ spec:
           - name: PYNGUIN_LLM_BASE_URL
             value: "http://ollama.info.unamur.be"
         volumeMounts:
-          - name: prompt-benchmark-results
+          - name: benchmark-results
             mountPath: /pynguin/results
       - name: model-benchmark
         image: ghcr.io/oetgin/pynguin-benchmark:latest
@@ -26,7 +26,7 @@ spec:
           - name: PYNGUIN_LLM_BASE_URL
             value: "http://ollama.info.unamur.be"
         volumeMounts:
-          - name: model-benchmark-results
+          - name: benchmark-results
             mountPath: /pynguin/results
       - name: classic-ours-benchmark
         args: ["--to-run=classic"]
@@ -35,7 +35,7 @@ spec:
             value: "http://ollama.info.unamur.be"
         image: ghcr.io/oetgin/pynguin-benchmark:latest
         volumeMounts:
-          - name: classic-ours-benchmark-results
+          - name: benchmark-results
             mountPath: /pynguin/results
       - name: classic-base-benchmark
         image: ghcr.io/oetgin/pynguin-base-benchmark:latest
@@ -44,19 +44,10 @@ spec:
           - name: PYNGUIN_LLM_BASE_URL
             value: "http://ollama.info.unamur.be"
         volumeMounts:
-          - name: classic-base-benchmark-results
+          - name: benchmark-results
             mountPath: /pynguin/results
       volumes:
-        - name: prompt-benchmark-results
-          persistentVolumeClaim:
-            claimName: pvc-lberg
-        - name: model-benchmark-results
-          persistentVolumeClaim:
-            claimName: pvc-lberg
-        - name: classic-ours-benchmark-results
-          persistentVolumeClaim:
-            claimName: pvc-lberg
-        - name: classic-base-benchmark-results
+        - name: benchmark-results
           persistentVolumeClaim:
             claimName: pvc-lberg
       restartPolicy: Never
