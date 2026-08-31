@@ -10,6 +10,7 @@
 *.blg
 *.fdb_latexmk
 *.fls
+*.pyg
 _minted
 _minted-*
 *(busy)

@@ -1,0 +1,381 @@
+experiment,metric,method,sample,n,mean,median,std,q1,q3
+model_results.csv,duration,Model experiment (qwen2.5-coder:0.5b),_numpy._ndarray,30,273.99768613333333,151.0224585,241.0017781475735,138.59205975,163.5673635
+model_results.csv,duration,Model experiment (qwen2.5-coder:0.5b),_numpy._getlimits,30,195.85148666666672,198.42447900000002,147.45107121444704,74.0276535,208.56647099999998
+model_results.csv,duration,Model experiment (qwen2.5-coder:0.5b),nn.attention.bias,30,588.5694401333333,468.227211,199.06199801127937,441.92161825,695.8364375
+model_results.csv,duration,Model experiment (qwen2.5-coder:0.5b),nn.attention.flex_attention,30,680.6663156666667,661.030122,364.25581307484373,333.72519775,916.4024175
+model_results.csv,duration,Model experiment (qwen2.5-coder:0.5b),_ForestDiffusion.diffusion_with_trees_class,30,316.4465716333333,118.71112,356.9040078328899,113.95062125,575.63613475
+model_results.csv,duration,Model experiment (qwen2.5-coder:0.5b),_ctgan.transformer,30,124.90447563333333,53.8088705,212.09097321732088,51.12517625,58.715999249999996
+model_results.csv,duration,Model experiment (qwen2.5-coder:0.5b),transformers.tokenization_utils_base,30,107.08019929999999,35.914339999999996,213.1872817678973,33.9803715,40.549068000000005
+model_results.csv,duration,Model experiment (qwen2.5-coder:0.5b),transformers.pipelines.text_generation,30,604.5407501000002,527.3543405,394.83613803144686,220.7531755,1012.9854605
+model_results.csv,duration,Model experiment (qwen2.5-coder:0.5b),transformers.data.metrics.squad_metrics,30,68.95641559999999,23.5745875,193.14599128735424,22.171792,57.89423675
+model_results.csv,duration,Model experiment (qwen2.5-coder:0.5b),nn.modules.rnn,30,601.8339373,235.63561950000002,518.2734618154132,226.6210705,1246.2183287500002
+model_results.csv,duration,Model experiment (qwen2.5-coder:1.5b),_numpy._ndarray,30,191.78663436666665,164.7699005,119.11520715365351,149.02237724999998,184.53811975
+model_results.csv,duration,Model experiment (qwen2.5-coder:1.5b),_numpy._getlimits,30,164.57866896666667,219.71855299999999,76.20068754751418,73.364924,227.53505625
+model_results.csv,duration,Model experiment (qwen2.5-coder:1.5b),nn.attention.bias,30,522.0641644333333,495.625204,112.97454201311547,484.6844745,512.88064
+model_results.csv,duration,Model experiment (qwen2.5-coder:1.5b),nn.attention.flex_attention,30,521.9247999,688.8200685,272.7950971203148,210.8099545,706.24954575
+model_results.csv,duration,Model experiment (qwen2.5-coder:1.5b),_ForestDiffusion.diffusion_with_trees_class,30,302.9876897666666,118.375025,292.6883536642177,113.1586185,726.8833515
+model_results.csv,duration,Model experiment (qwen2.5-coder:1.5b),_ctgan.transformer,30,134.54283610000002,55.147126,204.3424543309062,53.3126975,74.20209224999999
+model_results.csv,duration,Model experiment (qwen2.5-coder:1.5b),transformers.tokenization_utils_base,30,69.19676246666664,35.6372925,138.31114386367182,34.795095,52.57269775
+model_results.csv,duration,Model experiment (qwen2.5-coder:1.5b),transformers.pipelines.text_generation,30,524.9572187333334,223.75617599999998,456.22250111346364,204.872522,1065.62898525
+model_results.csv,duration,Model experiment (qwen2.5-coder:1.5b),transformers.data.metrics.squad_metrics,30,59.8434095,22.708232000000002,188.19358579109812,22.137522999999998,23.881435250000003
+model_results.csv,duration,Model experiment (qwen2.5-coder:1.5b),nn.modules.rnn,30,586.6229317333333,226.507835,546.5461147273384,212.1097785,1275.3646265
+model_results.csv,duration,Model experiment (qwen2.5-coder:3b),_numpy._ndarray,30,185.07657586666664,158.440153,110.48710983281961,151.07820425,166.2404545
+model_results.csv,duration,Model experiment (qwen2.5-coder:3b),_numpy._getlimits,30,168.79722326666666,238.3121375,89.46722821410616,73.84451849999999,252.7281375
+model_results.csv,duration,Model experiment (qwen2.5-coder:3b),nn.attention.bias,30,501.9058789,543.622657,121.50736249111895,531.54846675,555.410476
+model_results.csv,duration,Model experiment (qwen2.5-coder:3b),nn.attention.flex_attention,30,547.0448931333333,732.6510585000001,286.17559854021385,217.11216174999998,759.8040045
+model_results.csv,duration,Model experiment (qwen2.5-coder:3b),_ForestDiffusion.diffusion_with_trees_class,30,289.5025531666667,119.403358,290.55863226975055,115.28877525,598.3133735
+model_results.csv,duration,Model experiment (qwen2.5-coder:3b),_ctgan.transformer,30,212.4021898,59.5352345,326.66631091406083,54.49757975,94.41802924999999
+model_results.csv,duration,Model experiment (qwen2.5-coder:3b),transformers.tokenization_utils_base,30,135.79424626666662,37.4802035,238.3787122149595,35.462796499999996,39.7155155
+model_results.csv,duration,Model experiment (qwen2.5-coder:3b),transformers.pipelines.text_generation,30,585.0865889666668,227.9012755,482.63237815426305,212.7826525,1126.898019
+model_results.csv,duration,Model experiment (qwen2.5-coder:3b),transformers.data.metrics.squad_metrics,30,94.95443746666668,25.6564515,211.9058241165446,24.2298025,58.4267455
+model_results.csv,duration,Model experiment (qwen2.5-coder:3b),nn.modules.rnn,30,590.7681902333333,262.7382005,514.5032616122857,228.8176075,1204.4577535
+model_results.csv,duration,Model experiment (gemma4:e2b),_numpy._ndarray,30,188.51758609999996,196.21891599999998,32.526972368534366,187.78230525,206.62739525
+model_results.csv,duration,Model experiment (gemma4:e2b),_numpy._getlimits,30,176.06553476666664,93.2864905,98.36477325926134,85.55718999999999,279.45357175000004
+model_results.csv,duration,Model experiment (gemma4:e2b),nn.attention.bias,30,526.0367179333333,610.5766160000001,173.78273906965964,592.31950675,624.03257525
+model_results.csv,duration,Model experiment (gemma4:e2b),nn.attention.flex_attention,30,552.7734278333334,801.977887,297.78627571368855,242.68680575000002,824.22366475
+model_results.csv,duration,Model experiment (gemma4:e2b),_ForestDiffusion.diffusion_with_trees_class,30,318.68273709999994,147.15902,295.75625700699555,138.9788545,635.8304674999999
+model_results.csv,duration,Model experiment (gemma4:e2b),_ctgan.transformer,30,124.20615396666666,70.198868,188.8809746472779,68.09798825,75.23997675000001
+model_results.csv,duration,Model experiment (gemma4:e2b),transformers.tokenization_utils_base,30,78.38949066666667,50.2372,141.91516774281843,48.223698999999996,52.502994
+model_results.csv,duration,Model experiment (gemma4:e2b),transformers.pipelines.text_generation,30,530.7557641333334,244.6041265,457.80975999038907,231.07233025,1200.0332985
+model_results.csv,duration,Model experiment (gemma4:e2b),transformers.data.metrics.squad_metrics,30,76.84910136666667,41.6168725,187.71442384985576,39.90571975,42.31359875
+model_results.csv,duration,Model experiment (gemma4:e2b),nn.modules.rnn,30,587.0977665666667,269.9756685,543.5398478233543,246.18403325000003,1163.19819175
+model_results.csv,duration,Model experiment (qwen2.5-coder:7b),_numpy._ndarray,30,149.67369336666664,150.72605249999998,12.72323977006997,142.33083725,157.3477565
+model_results.csv,duration,Model experiment (qwen2.5-coder:7b),_numpy._getlimits,30,172.83667259999996,86.889303,111.80579823830307,74.48532675,297.55907225
+model_results.csv,duration,Model experiment (qwen2.5-coder:7b),nn.attention.bias,30,502.10356686666665,617.6485845,202.11890255665207,201.5728735,640.1797327500001
+model_results.csv,duration,Model experiment (qwen2.5-coder:7b),nn.attention.flex_attention,30,531.2720581333333,241.5186595,400.6771322700438,228.3792585,1043.5378862500002
+model_results.csv,duration,Model experiment (qwen2.5-coder:7b),_ForestDiffusion.diffusion_with_trees_class,30,312.51718403333336,118.0418945,447.6895922697166,111.19139125,122.5040055
+model_results.csv,duration,Model experiment (qwen2.5-coder:7b),_ctgan.transformer,30,130.8897731333333,56.987364,275.2984463626322,53.45693575,63.26210375
+model_results.csv,duration,Model experiment (qwen2.5-coder:7b),transformers.tokenization_utils_base,30,118.83745636666666,40.799984,276.27894053256244,37.990247999999994,94.67454175
+model_results.csv,duration,Model experiment (qwen2.5-coder:7b),transformers.pipelines.text_generation,30,561.6577798333333,236.8363645,643.3497299100534,225.78366975,338.12797224999997
+model_results.csv,duration,Model experiment (qwen2.5-coder:7b),transformers.data.metrics.squad_metrics,30,144.68805136666663,30.63642,365.7168268655613,26.6045375,141.65465
+model_results.csv,duration,Model experiment (qwen2.5-coder:7b),nn.modules.rnn,30,629.7429360333333,282.97355400000004,766.6343506976235,253.10316975,376.219466
+model_results.csv,duration,Model experiment (qwen2.5:1.5b),_numpy._ndarray,30,173.78448590000002,154.5731725,114.05116495301513,141.18368525,168.645341
+model_results.csv,duration,Model experiment (qwen2.5:1.5b),_numpy._getlimits,30,163.93898950000002,75.4029975,121.21011478754043,71.78445475,314.3295805
+model_results.csv,duration,Model experiment (qwen2.5:1.5b),nn.attention.bias,30,523.6592488333333,670.259635,230.4387369132173,209.3876195,688.3590625
+model_results.csv,duration,Model experiment (qwen2.5:1.5b),nn.attention.flex_attention,30,574.5972113666666,226.8363655,460.03058598701926,209.5924805,1077.01916125
+model_results.csv,duration,Model experiment (qwen2.5:1.5b),_ForestDiffusion.diffusion_with_trees_class,30,273.14494296666663,115.90661850000001,412.6484724183487,112.7329305,118.59342000000001
+model_results.csv,duration,Model experiment (qwen2.5:1.5b),_ctgan.transformer,30,148.1099089,53.5192655,347.63678263784607,51.6130355,55.1690565
+model_results.csv,duration,Model experiment (qwen2.5:1.5b),transformers.tokenization_utils_base,30,37.90656776666666,34.1257085,12.589436201139229,33.231767250000004,36.323890500000005
+model_results.csv,duration,Model experiment (qwen2.5:1.5b),transformers.pipelines.text_generation,30,551.6247774999999,226.6198795,670.5567151904612,208.919547,252.22705374999998
+model_results.csv,duration,Model experiment (qwen2.5:1.5b),transformers.data.metrics.squad_metrics,30,40.032140566666676,23.560544,23.315606895676463,22.875462749999997,55.41449325
+model_results.csv,duration,Model experiment (qwen2.5:1.5b),nn.modules.rnn,30,525.1103249333333,238.996679,725.2215610466773,225.316713,253.6688995
+model_results.csv,duration,Model experiment (qwen2.5:3b),_numpy._ndarray,30,163.47104549999997,155.14627000000002,24.636173012072113,147.29501199999999,165.2540335
+model_results.csv,duration,Model experiment (qwen2.5:3b),_numpy._getlimits,30,173.33517160000002,77.172935,131.7219428462733,74.0468015,338.74759425
+model_results.csv,duration,Model experiment (qwen2.5:3b),nn.attention.bias,30,504.7440452666667,716.1899045,265.60108234606963,208.66841325000001,732.09244825
+model_results.csv,duration,Model experiment (qwen2.5:3b),nn.attention.flex_attention,30,626.9576417666666,278.97562400000004,472.40704672761063,236.88321725,1123.1399835
+model_results.csv,duration,Model experiment (qwen2.5:3b),_ForestDiffusion.diffusion_with_trees_class,30,372.39114340000003,120.9098045,593.652788529274,116.195067,127.6950245
+model_results.csv,duration,Model experiment (qwen2.5:3b),_ctgan.transformer,30,131.97448603333333,56.030497999999994,270.8049228649796,52.12146825,61.693139
+model_results.csv,duration,Model experiment (qwen2.5:3b),transformers.tokenization_utils_base,30,132.06504396666665,37.1448585,307.63381813917727,35.845948,38.567085250000005
+model_results.csv,duration,Model experiment (qwen2.5:3b),transformers.pipelines.text_generation,30,564.6256329,228.464311,694.9536063299639,216.036475,235.231248
+model_results.csv,duration,Model experiment (qwen2.5:3b),transformers.data.metrics.squad_metrics,30,100.88742699999997,124.934588,59.949631559295604,25.622536,137.81775175
+model_results.csv,duration,Model experiment (qwen2.5:3b),nn.modules.rnn,30,646.4209164666668,244.674782,826.9190725027647,223.5625325,307.229926
+model_results.csv,duration,Model experiment (qwen3:4b),_numpy._ndarray,30,245.41616359999998,244.76521,42.28365751677188,231.41755475000002,267.66191549999996
+model_results.csv,duration,Model experiment (qwen3:4b),_numpy._getlimits,30,215.92943813333332,121.780168,140.49778431072895,114.16226125,401.65178499999996
+model_results.csv,duration,Model experiment (qwen3:4b),nn.attention.bias,30,568.2148802666667,815.855382,293.24981081975807,262.19485475,838.06178275
+model_results.csv,duration,Model experiment (qwen3:4b),nn.attention.flex_attention,30,607.2321032333332,291.0699525,463.7543083142703,272.68507475,1241.24585525
+model_results.csv,duration,Model experiment (qwen3:4b),_ForestDiffusion.diffusion_with_trees_class,30,395.1871346,194.063901,468.8953853114876,176.487889,216.84048925000002
+model_results.csv,duration,Model experiment (qwen3:4b),_ctgan.transformer,30,188.72173563333337,93.8500255,358.3135797410999,88.794595,101.06184225
+model_results.csv,duration,Model experiment (qwen3:4b),transformers.tokenization_utils_base,30,165.79645449999998,124.639089,283.76452240697853,91.89410925,131.28718924999998
+model_results.csv,duration,Model experiment (qwen3:4b),transformers.pipelines.text_generation,30,628.1168426333335,270.40805950000004,726.0242144253089,261.75467199999997,295.8186535
+model_results.csv,duration,Model experiment (qwen3:4b),transformers.data.metrics.squad_metrics,30,148.72435736666665,80.4482645,372.7798137643087,75.13604525,89.26993675
+model_results.csv,duration,Model experiment (qwen3:4b),nn.modules.rnn,30,647.1780732666665,358.11983150000003,773.4557938485419,341.13549025,374.43975975
+model_results.csv,duration,Model experiment (qwen3.5:4b),_numpy._ndarray,30,244.2958929,225.675025,82.9180254544858,182.08134324999997,318.01991699999996
+model_results.csv,duration,Model experiment (qwen3.5:4b),_numpy._getlimits,30,242.48964403333332,155.729944,150.9118877944451,140.5215775,429.97299175
+model_results.csv,duration,Model experiment (qwen3.5:4b),nn.attention.bias,30,585.1064306333333,387.398162,320.8619504968629,289.75134349999996,913.1179485
+model_results.csv,duration,Model experiment (qwen3.5:4b),nn.attention.flex_attention,30,633.9165157333334,328.36397,488.0677849654784,274.51924125000005,1252.6442917499999
+model_results.csv,duration,Model experiment (qwen3.5:4b),_ForestDiffusion.diffusion_with_trees_class,30,361.83798686666665,195.414198,448.2250629467683,170.95202875,228.404642
+model_results.csv,duration,Model experiment (qwen3.5:4b),_ctgan.transformer,30,187.2933182666667,141.19787250000002,264.27335701321795,117.4717905,163.94683750000002
+model_results.csv,duration,Model experiment (qwen3.5:4b),transformers.tokenization_utils_base,30,154.25438116666663,105.995784,286.3053178859837,57.8227225,139.9388265
+model_results.csv,duration,Model experiment (qwen3.5:4b),transformers.pipelines.text_generation,30,641.0772892333333,328.9750255,687.5721280544151,296.484783,469.34335875
+model_results.csv,duration,Model experiment (qwen3.5:4b),transformers.data.metrics.squad_metrics,30,125.58144846666669,109.250803,65.86531128947153,93.006879,137.37596050000002
+model_results.csv,duration,Model experiment (qwen3.5:4b),nn.modules.rnn,30,692.3037781333334,321.75564199999997,872.4372818483936,267.6305555,382.866661
+model_results.csv,duration,Model experiment (gemma4:12b),_numpy._ndarray,30,338.89302330000004,359.0571865,102.48790777615102,251.54606925000002,404.48816925
+model_results.csv,duration,Model experiment (gemma4:12b),_numpy._getlimits,30,244.44875273333335,159.8224645,155.1288223362753,136.712692,457.09022949999996
+model_results.csv,duration,Model experiment (gemma4:12b),nn.attention.bias,30,597.4100640000001,303.1341075,351.83210715574864,273.73466974999997,958.8030725000001
+model_results.csv,duration,Model experiment (gemma4:12b),nn.attention.flex_attention,30,638.7391486333333,327.30652050000003,498.0984242711517,309.18531425,1353.177967
+model_results.csv,duration,Model experiment (gemma4:12b),_ForestDiffusion.diffusion_with_trees_class,30,359.38028916666667,184.47945950000002,440.21206642600083,172.35422625,212.2747555
+model_results.csv,duration,Model experiment (gemma4:12b),_ctgan.transformer,30,171.4540794333333,121.47877650000001,261.5707325756424,104.37955575000001,141.91766375
+model_results.csv,duration,Model experiment (gemma4:12b),transformers.tokenization_utils_base,30,196.0333546333333,125.91049950000001,294.13882012518803,101.353856,167.01750074999998
+model_results.csv,duration,Model experiment (gemma4:12b),transformers.pipelines.text_generation,30,626.2703490666668,318.993223,708.9038277001018,302.2879915,334.84721774999997
+model_results.csv,duration,Model experiment (gemma4:12b),transformers.data.metrics.squad_metrics,30,208.09195156666667,122.44021599999999,374.4521012819251,99.94093000000001,184.216761
+model_results.csv,duration,Model experiment (gemma4:12b),nn.modules.rnn,30,628.1588914333335,309.1301055,807.7170077437579,298.96966150000003,334.131777
+model_results.csv,duration,Model experiment (gemma4:26b),_numpy._ndarray,30,243.54580063333333,290.511599,94.9285831913855,146.114237,334.57458125
+model_results.csv,duration,Model experiment (gemma4:26b),_numpy._getlimits,30,209.19259573333335,116.16487699999999,162.71501144062628,107.1142255,382.85165125
+model_results.csv,duration,Model experiment (gemma4:26b),nn.attention.bias,30,568.4148233,266.3644715,367.6256638939943,251.675426,981.8671147499999
+model_results.csv,duration,Model experiment (gemma4:26b),nn.attention.flex_attention,30,617.5463225999998,284.762799,521.9587442076721,275.3081265,1372.947518
+model_results.csv,duration,Model experiment (gemma4:26b),_ForestDiffusion.diffusion_with_trees_class,30,331.6700577,158.1026,451.37451378972463,152.14625775000002,166.68540199999998
+model_results.csv,duration,Model experiment (gemma4:26b),_ctgan.transformer,30,179.26398376666663,120.910337,267.1442198843364,110.28253325,138.743755
+model_results.csv,duration,Model experiment (gemma4:26b),transformers.tokenization_utils_base,30,107.25839040000001,100.978568,30.752656778155615,91.7848545,113.53347975
+model_results.csv,duration,Model experiment (gemma4:26b),transformers.pipelines.text_generation,30,614.3100782666667,286.4553985,735.701388207311,276.62163775,340.721131
+model_results.csv,duration,Model experiment (gemma4:26b),transformers.data.metrics.squad_metrics,30,72.68324713333335,71.20810499999999,11.660040400160902,64.6918445,79.96955125
+model_results.csv,duration,Model experiment (gemma4:26b),nn.modules.rnn,30,659.8069617333333,340.2838495,824.0250700780398,285.97677799999997,442.48860925
+model_results.csv,duration,Model experiment (gemma4:31b),_numpy._ndarray,30,306.0507548,262.3826915,109.00411941632046,203.95960125,401.90725075
+model_results.csv,duration,Model experiment (gemma4:31b),_numpy._getlimits,30,283.64005546666675,181.7682855,195.7278294895149,158.827592,488.74383625
+model_results.csv,duration,Model experiment (gemma4:31b),nn.attention.bias,30,622.151317,332.898845,383.16586727080386,311.15963125,1078.21903175
+model_results.csv,duration,Model experiment (gemma4:31b),nn.attention.flex_attention,30,673.9735432333332,370.22131449999995,521.6476251790681,350.89688175000003,1222.6378515000001
+model_results.csv,duration,Model experiment (gemma4:31b),_ForestDiffusion.diffusion_with_trees_class,30,424.36228019999993,247.555586,456.5598178575578,236.65257125,262.47232925
+model_results.csv,duration,Model experiment (gemma4:31b),_ctgan.transformer,30,264.58915319999994,159.0988575,382.08848540815444,152.9612735,174.2189495
+model_results.csv,duration,Model experiment (gemma4:31b),transformers.tokenization_utils_base,30,205.54327686666664,151.28621800000002,291.44078534360636,139.10696925,156.62899225
+model_results.csv,duration,Model experiment (gemma4:31b),transformers.pipelines.text_generation,30,731.5230369333333,406.8260665,753.0676615577173,397.23216825,417.93977725
+model_results.csv,duration,Model experiment (gemma4:31b),transformers.data.metrics.squad_metrics,30,214.22802069999997,145.850297,376.51027228186535,134.20267925,154.68877799999999
+model_results.csv,duration,Model experiment (gemma4:31b),nn.modules.rnn,30,704.1684109,381.8102555,835.8460904307644,367.39586299999996,407.61120425
+model_results.csv,score,Model experiment (qwen2.5-coder:0.5b),_numpy._ndarray,30,0.004477611940298508,0.0,0.01704009839792658,0.0,0.0
+model_results.csv,score,Model experiment (qwen2.5-coder:0.5b),_numpy._getlimits,30,0.12222222222222222,0.0,0.3092858333196163,0.0,0.0
+model_results.csv,score,Model experiment (qwen2.5-coder:0.5b),nn.attention.bias,30,0.010606060606060607,0.0,0.02782444387622138,0.0,0.0
+model_results.csv,score,Model experiment (qwen2.5-coder:0.5b),nn.attention.flex_attention,30,0.00411764705882353,0.0,0.007591465890918995,0.0,0.0
+model_results.csv,score,Model experiment (qwen2.5-coder:0.5b),_ForestDiffusion.diffusion_with_trees_class,30,0.0033816425120772944,0.0,0.006234537205102555,0.0,0.0
+model_results.csv,score,Model experiment (qwen2.5-coder:0.5b),_ctgan.transformer,30,0.06666666666666667,0.0,0.12448417617341526,0.0,0.0
+model_results.csv,score,Model experiment (qwen2.5-coder:0.5b),transformers.tokenization_utils_base,30,0.0018276762402088772,0.0,0.005651203264856102,0.0,0.0
+model_results.csv,score,Model experiment (qwen2.5-coder:0.5b),transformers.pipelines.text_generation,30,0.0027932960893854745,0.0,0.00635277690149919,0.0,0.0
+model_results.csv,score,Model experiment (qwen2.5-coder:0.5b),transformers.data.metrics.squad_metrics,30,0.016783216783216783,0.0,0.025136615968131576,0.0,0.03758741258741259
+model_results.csv,score,Model experiment (qwen2.5-coder:0.5b),nn.modules.rnn,30,0.0277504105090312,0.0,0.059659070129266877,0.0,0.0
+model_results.csv,score,Model experiment (qwen2.5-coder:1.5b),_numpy._ndarray,30,0.025995024875621893,0.0,0.055815391926836,0.0,0.0
+model_results.csv,score,Model experiment (qwen2.5-coder:1.5b),_numpy._getlimits,30,0.08888888888888888,0.0,0.26163841758830036,0.0,0.0
+model_results.csv,score,Model experiment (qwen2.5-coder:1.5b),nn.attention.bias,30,0.017424242424242422,0.0,0.043730360707532535,0.0,0.0
+model_results.csv,score,Model experiment (qwen2.5-coder:1.5b),nn.attention.flex_attention,30,0.003431372549019608,0.0,0.01030739026513863,0.0,0.0
+model_results.csv,score,Model experiment (qwen2.5-coder:1.5b),_ForestDiffusion.diffusion_with_trees_class,30,0.000966183574879227,0.0,0.003676929444963223,0.0,0.0
+model_results.csv,score,Model experiment (qwen2.5-coder:1.5b),_ctgan.transformer,30,0.05698924731182795,0.0,0.10570009214220859,0.0,0.0
+model_results.csv,score,Model experiment (qwen2.5-coder:1.5b),transformers.tokenization_utils_base,30,0.004322599361763852,0.0,0.00950229629766661,0.0,0.0
+model_results.csv,score,Model experiment (qwen2.5-coder:1.5b),transformers.pipelines.text_generation,30,0.003910614525139664,0.0,0.0072097720751744645,0.0,0.0
+model_results.csv,score,Model experiment (qwen2.5-coder:1.5b),transformers.data.metrics.squad_metrics,30,0.0036130536130536133,0.0,0.013940223247234238,0.0,0.0
+model_results.csv,score,Model experiment (qwen2.5-coder:1.5b),nn.modules.rnn,30,0.022331691297208536,0.0,0.053737238574811955,0.0,0.0
+model_results.csv,score,Model experiment (qwen2.5-coder:3b),_numpy._ndarray,30,0.061940298507462674,0.06716417910447761,0.06609487909404382,0.0,0.08768656716417911
+model_results.csv,score,Model experiment (qwen2.5-coder:3b),_numpy._getlimits,30,0.13333333333333333,0.0,0.34574590364176044,0.0,0.0
+model_results.csv,score,Model experiment (qwen2.5-coder:3b),nn.attention.bias,30,0.013636363636363636,0.0,0.02773896151176042,0.0,0.0
+model_results.csv,score,Model experiment (qwen2.5-coder:3b),nn.attention.flex_attention,30,0.006470588235294117,0.0,0.01514358750274082,0.0,0.0
+model_results.csv,score,Model experiment (qwen2.5-coder:3b),_ForestDiffusion.diffusion_with_trees_class,30,0.0004830917874396135,0.0,0.0026460026932616718,0.0,0.0
+model_results.csv,score,Model experiment (qwen2.5-coder:3b),_ctgan.transformer,30,0.04301075268817204,0.0,0.09891344585884082,0.0,0.0
+model_results.csv,score,Model experiment (qwen2.5-coder:3b),transformers.tokenization_utils_base,30,0.0004641717435451117,0.0,0.0025423733449616063,0.0,0.0
+model_results.csv,score,Model experiment (qwen2.5-coder:3b),transformers.pipelines.text_generation,30,0.0005586592178770949,0.0,0.003059902555894783,0.0,0.0
+model_results.csv,score,Model experiment (qwen2.5-coder:3b),transformers.data.metrics.squad_metrics,30,0.01515151515151515,0.0,0.025830314600777803,0.0,0.028846153846153848
+model_results.csv,score,Model experiment (qwen2.5-coder:3b),nn.modules.rnn,30,0.06896551724137931,0.0,0.08990700411867816,0.0,0.1748768472906404
+model_results.csv,score,Model experiment (gemma4:e2b),_numpy._ndarray,30,0.03097014925373134,0.0,0.05089015280407789,0.0,0.06716417910447761
+model_results.csv,score,Model experiment (gemma4:e2b),_numpy._getlimits,30,0.03333333333333333,0.0,0.18257418583505533,0.0,0.0
+model_results.csv,score,Model experiment (gemma4:e2b),nn.attention.bias,30,0.006818181818181819,0.0,0.03734471982989769,0.0,0.0
+model_results.csv,score,Model experiment (gemma4:e2b),nn.attention.flex_attention,30,0.000588235294117647,0.0,0.0032218973970892122,0.0,0.0
+model_results.csv,score,Model experiment (gemma4:e2b),_ForestDiffusion.diffusion_with_trees_class,30,0.0004830917874396135,0.0,0.0026460026932616718,0.0,0.0
+model_results.csv,score,Model experiment (gemma4:e2b),_ctgan.transformer,30,0.025806451612903222,0.0,0.07689850751850805,0.0,0.0
+model_results.csv,score,Model experiment (gemma4:e2b),transformers.tokenization_utils_base,30,0.000783289817232376,0.0,0.00429025501962271,0.0,0.0
+model_results.csv,score,Model experiment (gemma4:e2b),transformers.pipelines.text_generation,30,0.0,0.0,0.0,0.0,0.0
+model_results.csv,score,Model experiment (gemma4:e2b),transformers.data.metrics.squad_metrics,30,0.003263403263403264,0.0,0.012951013188246898,0.0,0.0
+model_results.csv,score,Model experiment (gemma4:e2b),nn.modules.rnn,30,0.06691297208538588,0.0,0.09761361981038634,0.0,0.1748768472906404
+model_results.csv,score,Model experiment (qwen2.5-coder:7b),_numpy._ndarray,30,0.06542288557213931,0.06716417910447761,0.06907232097795374,0.0,0.08768656716417911
+model_results.csv,score,Model experiment (qwen2.5-coder:7b),_numpy._getlimits,30,0.16666666666666666,0.0,0.3790490217894517,0.0,0.0
+model_results.csv,score,Model experiment (qwen2.5-coder:7b),nn.attention.bias,30,0.0,0.0,0.0,0.0,0.0
+model_results.csv,score,Model experiment (qwen2.5-coder:7b),nn.attention.flex_attention,30,0.006372549019607843,0.0,0.015622228107947837,0.0,0.0
+model_results.csv,score,Model experiment (qwen2.5-coder:7b),_ForestDiffusion.diffusion_with_trees_class,30,0.0004830917874396135,0.0,0.002646002693261672,0.0,0.0
+model_results.csv,score,Model experiment (qwen2.5-coder:7b),_ctgan.transformer,30,0.04516129032258064,0.0,0.10326751104147071,0.0,0.0
+model_results.csv,score,Model experiment (qwen2.5-coder:7b),transformers.tokenization_utils_base,30,0.004235567159849144,0.0,0.009400737447742776,0.0,0.0
+model_results.csv,score,Model experiment (qwen2.5-coder:7b),transformers.pipelines.text_generation,30,0.0022346368715083797,0.0,0.00579462408338146,0.0,0.0
+model_results.csv,score,Model experiment (qwen2.5-coder:7b),transformers.data.metrics.squad_metrics,30,0.02400932400932401,0.0,0.02994789832797414,0.0,0.05944055944055944
+model_results.csv,score,Model experiment (qwen2.5-coder:7b),nn.modules.rnn,30,0.09113300492610836,0.0,0.09991163911041277,0.0,0.18903940886699505
+model_results.csv,score,Model experiment (qwen2.5:1.5b),_numpy._ndarray,30,0.013681592039800993,0.0,0.027859700862046442,0.0,0.0
+model_results.csv,score,Model experiment (qwen2.5:1.5b),_numpy._getlimits,30,0.0,0.0,0.0,0.0,0.0
+model_results.csv,score,Model experiment (qwen2.5:1.5b),nn.attention.bias,30,0.01515151515151515,0.0,0.04276249687490157,0.0,0.0
+model_results.csv,score,Model experiment (qwen2.5:1.5b),nn.attention.flex_attention,30,0.003921568627450981,0.0,0.012932260743404821,0.0,0.0
+model_results.csv,score,Model experiment (qwen2.5:1.5b),_ForestDiffusion.diffusion_with_trees_class,30,0.0,0.0,0.0,0.0,0.0
+model_results.csv,score,Model experiment (qwen2.5:1.5b),_ctgan.transformer,30,0.019354838709677417,0.0,0.07414274993580523,0.0,0.0
+model_results.csv,score,Model experiment (qwen2.5:1.5b),transformers.tokenization_utils_base,30,0.0010443864229765015,0.0,0.00398110615820068,0.0,0.0
+model_results.csv,score,Model experiment (qwen2.5:1.5b),transformers.pipelines.text_generation,30,0.0011173184357541898,0.0,0.004252091592778701,0.0,0.0
+model_results.csv,score,Model experiment (qwen2.5:1.5b),transformers.data.metrics.squad_metrics,30,0.018764568764568765,0.0,0.024110812850378496,0.0,0.038461538461538464
+model_results.csv,score,Model experiment (qwen2.5:1.5b),nn.modules.rnn,30,0.024384236453201973,0.0,0.059681565909550365,0.0,0.0
+model_results.csv,score,Model experiment (qwen2.5:3b),_numpy._ndarray,30,0.05932835820895522,0.06716417910447761,0.03467720332682186,0.06716417910447761,0.08208955223880597
+model_results.csv,score,Model experiment (qwen2.5:3b),_numpy._getlimits,30,0.03333333333333333,0.0,0.18257418583505536,0.0,0.0
+model_results.csv,score,Model experiment (qwen2.5:3b),nn.attention.bias,30,0.0,0.0,0.0,0.0,0.0
+model_results.csv,score,Model experiment (qwen2.5:3b),nn.attention.flex_attention,30,0.018235294117647058,0.01764705882352941,0.020485108277436295,0.0,0.028676470588235296
+model_results.csv,score,Model experiment (qwen2.5:3b),_ForestDiffusion.diffusion_with_trees_class,30,0.0014492753623188406,0.0,0.004422153284483547,0.0,0.0
+model_results.csv,score,Model experiment (qwen2.5:3b),_ctgan.transformer,30,0.04623655913978495,0.0,0.10603902019928774,0.0,0.0
+model_results.csv,score,Model experiment (qwen2.5:3b),transformers.tokenization_utils_base,30,0.0010443864229765013,0.0,0.003974539922231787,0.0,0.0
+model_results.csv,score,Model experiment (qwen2.5:3b),transformers.pipelines.text_generation,30,0.0,0.0,0.0,0.0,0.0
+model_results.csv,score,Model experiment (qwen2.5:3b),transformers.data.metrics.squad_metrics,30,0.03508158508158508,0.04895104895104895,0.025718274440745068,0.0,0.055944055944055944
+model_results.csv,score,Model experiment (qwen2.5:3b),nn.modules.rnn,30,0.03825944170771757,0.0,0.0735133666128203,0.0,0.0
+model_results.csv,score,Model experiment (qwen3:4b),_numpy._ndarray,30,0.060447761194029864,0.06716417910447761,0.020493710370628967,0.06716417910447761,0.06716417910447761
+model_results.csv,score,Model experiment (qwen3:4b),_numpy._getlimits,30,0.06666666666666667,0.0,0.2537081317024624,0.0,0.0
+model_results.csv,score,Model experiment (qwen3:4b),nn.attention.bias,30,0.0,0.0,0.0,0.0,0.0
+model_results.csv,score,Model experiment (qwen3:4b),nn.attention.flex_attention,30,0.005098039215686275,0.0,0.015561965183442604,0.0,0.0
+model_results.csv,score,Model experiment (qwen3:4b),_ForestDiffusion.diffusion_with_trees_class,30,0.0004830917874396135,0.0,0.0026460026932616718,0.0,0.0
+model_results.csv,score,Model experiment (qwen3:4b),_ctgan.transformer,30,0.007526881720430107,0.0,0.041226429059528634,0.0,0.0
+model_results.csv,score,Model experiment (qwen3:4b),transformers.tokenization_utils_base,30,0.00832608064984044,0.012184508268059183,0.006575489297754211,0.0,0.012184508268059183
+model_results.csv,score,Model experiment (qwen3:4b),transformers.pipelines.text_generation,30,0.0005586592178770949,0.0,0.003059902555894783,0.0,0.0
+model_results.csv,score,Model experiment (qwen3:4b),transformers.data.metrics.squad_metrics,30,0.0,0.0,0.0,0.0,0.0
+model_results.csv,score,Model experiment (qwen3:4b),nn.modules.rnn,30,0.06929392446633824,0.03694581280788178,0.07027480675612813,0.03694581280788178,0.12561576354679804
+model_results.csv,score,Model experiment (qwen3.5:4b),_numpy._ndarray,30,0.03818407960199006,0.06343283582089553,0.03684319407713972,0.0,0.06716417910447761
+model_results.csv,score,Model experiment (qwen3.5:4b),_numpy._getlimits,30,0.14444444444444443,0.0,0.33543399386481715,0.0,0.0
+model_results.csv,score,Model experiment (qwen3.5:4b),nn.attention.bias,30,0.006818181818181818,0.0,0.027448493177485146,0.0,0.0
+model_results.csv,score,Model experiment (qwen3.5:4b),nn.attention.flex_attention,30,0.007058823529411765,0.0,0.008793050808043055,0.0,0.01764705882352941
+model_results.csv,score,Model experiment (qwen3.5:4b),_ForestDiffusion.diffusion_with_trees_class,30,0.008454106280193238,0.014492753623188406,0.007631764209370574,0.0,0.014492753623188406
+model_results.csv,score,Model experiment (qwen3.5:4b),_ctgan.transformer,30,0.05268817204301075,0.0,0.06855193124821145,0.0,0.0967741935483871
+model_results.csv,score,Model experiment (qwen3.5:4b),transformers.tokenization_utils_base,30,0.0025819553234696837,0.0,0.004091652050735237,0.0,0.007832898172323759
+model_results.csv,score,Model experiment (qwen3.5:4b),transformers.pipelines.text_generation,30,0.011173184357541896,0.01675977653631285,0.008035697790257834,0.0,0.01675977653631285
+model_results.csv,score,Model experiment (qwen3.5:4b),transformers.data.metrics.squad_metrics,30,0.016433566433566433,0.0034965034965034965,0.018821409755090727,0.0,0.03496503496503497
+model_results.csv,score,Model experiment (qwen3.5:4b),nn.modules.rnn,30,0.04958949096880131,0.0,0.07357594458663563,0.0,0.1440886699507389
+model_results.csv,score,Model experiment (gemma4:12b),_numpy._ndarray,30,0.058084577114427854,0.06716417910447761,0.04025563536644583,0.0,0.08955223880597014
+model_results.csv,score,Model experiment (gemma4:12b),_numpy._getlimits,30,0.5666666666666667,1.0,0.5040069329937308,0.0,1.0
+model_results.csv,score,Model experiment (gemma4:12b),nn.attention.bias,30,0.0,0.0,0.0,0.0,0.0
+model_results.csv,score,Model experiment (gemma4:12b),nn.attention.flex_attention,30,0.0,0.0,0.0,0.0,0.0
+model_results.csv,score,Model experiment (gemma4:12b),_ForestDiffusion.diffusion_with_trees_class,30,0.0004830917874396135,0.0,0.0026460026932616718,0.0,0.0
+model_results.csv,score,Model experiment (gemma4:12b),_ctgan.transformer,30,0.0,0.0,0.0,0.0,0.0
+model_results.csv,score,Model experiment (gemma4:12b),transformers.tokenization_utils_base,30,0.0033362344067304904,0.0,0.009059319593951683,0.0,0.0
+model_results.csv,score,Model experiment (gemma4:12b),transformers.pipelines.text_generation,30,0.0005586592178770949,0.0,0.003059902555894783,0.0,0.0
+model_results.csv,score,Model experiment (gemma4:12b),transformers.data.metrics.squad_metrics,30,0.00337995337995338,0.0,0.013510213089094478,0.0,0.0
+model_results.csv,score,Model experiment (gemma4:12b),nn.modules.rnn,30,0.005829228243021347,0.0,0.03192799801548998,0.0,0.0
+model_results.csv,score,Model experiment (gemma4:26b),_numpy._ndarray,30,0.03656716417910448,0.0,0.04353000998601573,0.0,0.08675373134328358
+model_results.csv,score,Model experiment (gemma4:26b),_numpy._getlimits,30,0.16666666666666666,0.0,0.3790490217894517,0.0,0.0
+model_results.csv,score,Model experiment (gemma4:26b),nn.attention.bias,30,0.0,0.0,0.0,0.0,0.0
+model_results.csv,score,Model experiment (gemma4:26b),nn.attention.flex_attention,30,0.001176470588235294,0.0,0.006443794794178425,0.0,0.0
+model_results.csv,score,Model experiment (gemma4:26b),_ForestDiffusion.diffusion_with_trees_class,30,0.0,0.0,0.0,0.0,0.0
+model_results.csv,score,Model experiment (gemma4:26b),_ctgan.transformer,30,0.05376344086021505,0.0,0.13132920341965437,0.0,0.0
+model_results.csv,score,Model experiment (gemma4:26b),transformers.tokenization_utils_base,30,0.0009283434870902235,0.0,0.0038783048442221466,0.0,0.0
+model_results.csv,score,Model experiment (gemma4:26b),transformers.pipelines.text_generation,30,0.0022346368715083797,0.0,0.00579462408338146,0.0,0.0
+model_results.csv,score,Model experiment (gemma4:26b),transformers.data.metrics.squad_metrics,30,0.0,0.0,0.0,0.0,0.0
+model_results.csv,score,Model experiment (gemma4:26b),nn.modules.rnn,30,0.07348111658456487,0.0,0.09306277795279318,0.0,0.16564039408866993
+model_results.csv,score,Model experiment (gemma4:31b),_numpy._ndarray,30,0.0,0.0,0.0,0.0,0.0
+model_results.csv,score,Model experiment (gemma4:31b),_numpy._getlimits,30,0.4,0.0,0.4982728791224399,0.0,1.0
+model_results.csv,score,Model experiment (gemma4:31b),nn.attention.bias,30,0.0,0.0,0.0,0.0,0.0
+model_results.csv,score,Model experiment (gemma4:31b),nn.attention.flex_attention,30,0.0,0.0,0.0,0.0,0.0
+model_results.csv,score,Model experiment (gemma4:31b),_ForestDiffusion.diffusion_with_trees_class,30,0.0,0.0,0.0,0.0,0.0
+model_results.csv,score,Model experiment (gemma4:31b),_ctgan.transformer,30,0.012903225806451613,0.0,0.07067387838776339,0.0,0.0
+model_results.csv,score,Model experiment (gemma4:31b),transformers.tokenization_utils_base,30,0.0,0.0,0.0,0.0,0.0
+model_results.csv,score,Model experiment (gemma4:31b),transformers.pipelines.text_generation,30,0.0,0.0,0.0,0.0,0.0
+model_results.csv,score,Model experiment (gemma4:31b),transformers.data.metrics.squad_metrics,30,0.0,0.0,0.0,0.0,0.0
+model_results.csv,score,Model experiment (gemma4:31b),nn.modules.rnn,30,0.0,0.0,0.0,0.0,0.0
+classic_results.csv,duration,ours,_numpy._ndarray,30,305.6756842333334,182.719943,237.53372260256248,167.87981875,234.19766875000002
+classic_results.csv,duration,ours,_numpy._getlimits,30,181.40472746666666,182.5655875,20.811606304370056,165.55336125,197.94740675
+classic_results.csv,duration,ours,nn.attention.bias,30,553.4358489333333,500.1166825,176.38285395073746,472.0635225,533.29341525
+classic_results.csv,duration,ours,nn.attention.flex_attention,30,684.3338232666667,592.136924,231.75730197456605,554.533019,652.042903
+classic_results.csv,duration,ours,_ForestDiffusion.diffusion_with_trees_class,30,426.38664919999997,369.208797,247.66994806854333,355.1297025,379.36561274999997
+classic_results.csv,duration,ours,_ctgan.transformer,30,147.6093541,93.6630545,95.8070542952778,90.97489125,139.5463635
+classic_results.csv,duration,ours,transformers.tokenization_utils_base,30,170.02820896666665,77.21315200000001,209.32661985050444,71.843692,80.87438575
+classic_results.csv,duration,ours,transformers.pipelines.text_generation,30,656.9549719,548.8981229999999,229.46952102170474,536.7263772499999,612.5042275
+classic_results.csv,duration,ours,transformers.data.metrics.squad_metrics,30,155.17587276666666,74.88083499999999,183.81006463205995,71.64485375,82.401374
+classic_results.csv,duration,ours,nn.modules.rnn,30,718.8715729666667,617.017488,254.18449234156225,597.33537775,714.564484
+classic_results.csv,duration,ours,_numpy._util,30,619.0327651333334,669.57212,157.22162866869851,651.56263,688.72689725
+classic_results.csv,duration,ours,_numpy._funcs,30,650.8235315,755.7226185,264.1832459247056,337.08610525,770.56639475
+classic_results.csv,duration,ours,_numpy._ufuncs,30,691.8207461333332,793.1809384999999,315.2986889085215,312.927362,816.65697825
+classic_results.csv,duration,ours,_numpy._normalizations,30,649.4847099666666,839.5482890000001,318.5736120341029,305.59693875,888.63143925
+classic_results.csv,duration,base,_numpy._ndarray,30,363.59276009999996,205.388047,263.55088208961956,180.26363575,748.2091295
+classic_results.csv,duration,base,_numpy._getlimits,30,179.3463445333333,180.9853035,20.181921738900716,164.44183999999998,193.5207075
+classic_results.csv,duration,base,nn.attention.bias,30,546.1812019333333,498.66427899999996,154.3552874280557,475.811787,551.0510885
+classic_results.csv,duration,base,nn.attention.flex_attention,30,684.0799389333333,595.5180605,257.51757370887253,539.76111525,731.0561
+classic_results.csv,duration,base,_ForestDiffusion.diffusion_with_trees_class,30,405.0203631333333,376.7305655,237.32947573225465,225.148741,396.56659
+classic_results.csv,duration,base,_ctgan.transformer,30,169.24718233333337,89.22094849999999,168.94053875549267,85.76165499999999,259.93109975
+classic_results.csv,duration,base,transformers.tokenization_utils_base,30,153.4311430666667,79.949595,170.0349032721307,78.09851175,91.703361
+classic_results.csv,duration,base,transformers.pipelines.text_generation,30,658.3425695666667,561.917689,202.98689334529854,539.653747,712.2563005
+classic_results.csv,duration,base,transformers.data.metrics.squad_metrics,30,215.57785563333337,80.84750700000001,224.72336562909217,72.84599424999999,371.6073265
+classic_results.csv,duration,base,nn.modules.rnn,30,770.5251421666666,641.3453770000001,252.41285408503396,609.0759800000001,983.4561755
+classic_results.csv,duration,base,_numpy._util,30,620.1062146,681.6748190000001,174.19254095801625,644.42266175,716.3381254999999
+classic_results.csv,duration,base,_numpy._funcs,30,706.0325418333333,761.42262,258.14144226696123,731.67122225,785.613984
+classic_results.csv,duration,base,_numpy._ufuncs,30,712.5796301000001,805.4354965,319.7781546993898,339.95539675,833.582104
+classic_results.csv,duration,base,_numpy._normalizations,30,673.1687628999997,841.132577,350.9943763956833,308.438013,880.0760097499999
+classic_results.csv,score,ours,_numpy._ndarray,30,0.08109452736318408,0.06716417910447761,0.026035327764678085,0.05970149253731343,0.08955223880597014
+classic_results.csv,score,ours,_numpy._getlimits,30,1.0,1.0,0.0,1.0,1.0
+classic_results.csv,score,ours,nn.attention.bias,30,0.11818181818181821,0.11363636363636363,0.01829899545165677,0.11363636363636363,0.11363636363636363
+classic_results.csv,score,ours,nn.attention.flex_attention,30,0.03362745098039215,0.03529411764705882,0.002857149959366404,0.029411764705882353,0.03529411764705882
+classic_results.csv,score,ours,_ForestDiffusion.diffusion_with_trees_class,30,0.014492753623188408,0.014492753623188406,1.7643790169011568e-18,0.014492753623188406,0.014492753623188406
+classic_results.csv,score,ours,_ctgan.transformer,30,0.18064516129032254,0.16129032258064516,0.06702571748734501,0.13709677419354838,0.16129032258064516
+classic_results.csv,score,ours,transformers.tokenization_utils_base,30,0.029416884247171447,0.0278503046127067,0.006629751099889845,0.0278503046127067,0.03220191470844212
+classic_results.csv,score,ours,transformers.pipelines.text_generation,30,0.016759776536312845,0.01675977653631285,3.5287580338023136e-18,0.01675977653631285,0.01675977653631285
+classic_results.csv,score,ours,transformers.data.metrics.squad_metrics,30,0.047552447552447544,0.04895104895104895,0.02210620301765073,0.027972027972027972,0.06643356643356643
+classic_results.csv,score,ours,nn.modules.rnn,30,0.05197044334975369,0.029556650246305417,0.049394036653073105,0.029556650246305417,0.037561576354679806
+classic_results.csv,score,ours,_numpy._util,30,0.19504504504504505,0.20270270270270271,0.027185771764106345,0.17567567567567569,0.20270270270270271
+classic_results.csv,score,ours,_numpy._funcs,30,0.7911111111111114,0.8,0.041920681655323803,0.75,0.8
+classic_results.csv,score,ours,_numpy._ufuncs,30,0.31871345029239767,0.3157894736842105,0.016015279459215388,0.3157894736842105,0.3157894736842105
+classic_results.csv,score,ours,_numpy._normalizations,30,0.1510548523206751,0.13924050632911392,0.023490063290097438,0.13924050632911392,0.1518987341772152
+classic_results.csv,score,base,_numpy._ndarray,30,0.07650676506765065,0.06273062730627306,0.044449071683357384,0.06273062730627306,0.06273062730627306
+classic_results.csv,score,base,_numpy._getlimits,30,1.0,1.0,0.0,1.0,1.0
+classic_results.csv,score,base,nn.attention.bias,30,0.16666666666666669,0.1590909090909091,0.02179378643115383,0.1590909090909091,0.1590909090909091
+classic_results.csv,score,base,nn.attention.flex_attention,30,0.025773195876288665,0.02577319587628866,7.057516067604627e-18,0.02577319587628866,0.02577319587628866
+classic_results.csv,score,base,_ForestDiffusion.diffusion_with_trees_class,30,0.014492753623188408,0.014492753623188406,1.7643790169011568e-18,0.014492753623188406,0.014492753623188406
+classic_results.csv,score,base,_ctgan.transformer,30,0.2387096774193548,0.22580645161290322,0.07067387838776339,0.22580645161290322,0.22580645161290322
+classic_results.csv,score,base,transformers.tokenization_utils_base,30,0.008703220191470845,0.008703220191470844,1.7643790169011568e-18,0.008703220191470844,0.008703220191470844
+classic_results.csv,score,base,transformers.pipelines.text_generation,30,0.016759776536312845,0.01675977653631285,3.5287580338023136e-18,0.01675977653631285,0.01675977653631285
+classic_results.csv,score,base,transformers.data.metrics.squad_metrics,30,0.0465034965034965,0.045454545454545456,0.00369008380170366,0.045454545454545456,0.045454545454545456
+classic_results.csv,score,base,nn.modules.rnn,30,0.05056360708534622,0.04830917874396135,0.010613117332191054,0.04830917874396135,0.04830917874396135
+classic_results.csv,score,base,_numpy._util,30,0.2602564102564103,0.21794871794871795,0.07135379859631295,0.21794871794871795,0.3044871794871795
+classic_results.csv,score,base,_numpy._funcs,30,0.8777777777777779,0.9333333333333333,0.07021223072620926,0.8,0.9333333333333333
+classic_results.csv,score,base,_numpy._ufuncs,30,0.3192982456140351,0.3157894736842105,0.013353059563287499,0.3157894736842105,0.3157894736842105
+classic_results.csv,score,base,_numpy._normalizations,30,0.09772727272727273,0.06818181818181818,0.05987840343138888,0.06818181818181818,0.08806818181818182
+prompt_results.csv,duration,DefaultPrompt,_numpy._ndarray,60,235.77994185,159.238804,192.21730432927137,149.40408075,183.037079
+prompt_results.csv,duration,DefaultPrompt,_numpy._getlimits,60,162.36440753333335,165.346096,31.6354832023454,148.4580495,179.905598
+prompt_results.csv,duration,DefaultPrompt,nn.attention.bias,60,490.79827349999994,497.2639875,80.02768222818264,424.874508,551.11462625
+prompt_results.csv,duration,DefaultPrompt,nn.attention.flex_attention,60,577.2257778333335,555.854467,180.40577224849892,470.55773925,610.61563125
+prompt_results.csv,duration,DefaultPrompt,_ForestDiffusion.diffusion_with_trees_class,60,290.8098712666667,131.642216,210.8295555064069,124.05074325,476.58486700000003
+prompt_results.csv,duration,DefaultPrompt,_ctgan.transformer,60,127.21083848333333,72.2050395,151.76927137387634,60.49344025,83.85071525000001
+prompt_results.csv,duration,DefaultPrompt,transformers.tokenization_utils_base,60,80.45528053333332,38.768117000000004,137.49128165821202,37.53315675,41.23208475
+prompt_results.csv,duration,DefaultPrompt,transformers.pipelines.text_generation,60,547.5695469,640.5077485,285.5887815269671,226.84815600000002,809.5404952499999
+prompt_results.csv,duration,DefaultPrompt,transformers.data.metrics.squad_metrics,60,139.98887073333333,101.35242450000001,164.45583643702412,60.20442575,123.82410675
+prompt_results.csv,duration,DefaultPrompt,nn.modules.rnn,60,585.1726296333334,545.575289,360.4892963285597,249.38938574999997,818.8185275000001
+prompt_results.csv,duration,DefaultPrompt,_numpy._util,60,588.9537053500001,313.132408,390.9390837265134,272.478896,931.846455
+prompt_results.csv,duration,DefaultPrompt,_numpy._funcs,60,573.5071153,250.417301,452.2824028393807,222.500943,1000.7454415
+prompt_results.csv,duration,DefaultPrompt,_numpy._ufuncs,60,622.8652894166668,306.6045685,529.949842792257,236.39968925,1086.66974925
+prompt_results.csv,duration,DefaultPrompt,_numpy._normalizations,60,626.4935749333332,310.784578,537.3238295268632,241.5777265,1163.15829175
+prompt_results.csv,duration,UncoveredTargetsPrompt,_numpy._ndarray,60,182.36735261666666,159.2558115,112.53699692123652,143.99025,174.03476125
+prompt_results.csv,duration,UncoveredTargetsPrompt,_numpy._getlimits,60,160.38802018333334,176.95966049999998,48.98597837056084,161.78257324999998,194.8497495
+prompt_results.csv,duration,UncoveredTargetsPrompt,nn.attention.bias,60,485.2231489666667,450.3356635,87.68218326944348,424.196511,568.8406685
+prompt_results.csv,duration,UncoveredTargetsPrompt,nn.attention.flex_attention,60,517.6015273166666,525.9440005,128.35483392890248,502.20005549999996,604.4204507500001
+prompt_results.csv,duration,UncoveredTargetsPrompt,_ForestDiffusion.diffusion_with_trees_class,60,280.0002876666667,117.80105499999999,211.10695761095977,111.583422,470.5292965
+prompt_results.csv,duration,UncoveredTargetsPrompt,_ctgan.transformer,60,137.55598783333335,55.037378000000004,186.48259834998234,53.490122,68.39191975
+prompt_results.csv,duration,UncoveredTargetsPrompt,transformers.tokenization_utils_base,60,90.36413413333334,37.201305500000004,152.4741692213069,35.32323925,46.170355
+prompt_results.csv,duration,UncoveredTargetsPrompt,transformers.pipelines.text_generation,60,528.1166865333333,663.4110475,329.7424463274799,207.494493,736.22212625
+prompt_results.csv,duration,UncoveredTargetsPrompt,transformers.data.metrics.squad_metrics,60,50.31475881666666,23.5548785,122.53713637992641,22.1676365,31.06556625
+prompt_results.csv,duration,UncoveredTargetsPrompt,nn.modules.rnn,60,545.0271378833332,240.8198025,362.2866181282397,217.58482899999998,835.05776625
+prompt_results.csv,duration,UncoveredTargetsPrompt,_numpy._util,60,519.3350686999999,220.0856895,411.4382495253386,208.74167825,913.7465589999999
+prompt_results.csv,duration,UncoveredTargetsPrompt,_numpy._funcs,60,522.1539445000001,224.3970425,462.1591891294955,211.241773,1010.928754
+prompt_results.csv,duration,UncoveredTargetsPrompt,_numpy._ufuncs,60,570.2944441,230.6785065,533.8095076069644,214.035467,1119.99531375
+prompt_results.csv,duration,UncoveredTargetsPrompt,_numpy._normalizations,60,574.9345584333333,229.3578855,552.9236890112232,217.19164899999998,1205.356605
+prompt_results.csv,duration,NoCompressionPrompt,_numpy._ndarray,30,303.07203510000005,174.40889249999998,233.10283590682772,156.1046445,314.54526075
+prompt_results.csv,duration,NoCompressionPrompt,_numpy._getlimits,30,167.90158676666667,217.93742500000002,73.58671998450585,73.44792975,224.322085
+prompt_results.csv,duration,NoCompressionPrompt,nn.attention.bias,30,516.2951177,497.67542149999997,131.04650849012768,485.06267675,516.596721
+prompt_results.csv,duration,NoCompressionPrompt,nn.attention.flex_attention,30,566.8435526,661.3577104999999,284.76760125972584,230.16384875,674.5498125
+prompt_results.csv,duration,NoCompressionPrompt,_ForestDiffusion.diffusion_with_trees_class,30,284.43074863333334,117.2571985,243.62411679812183,112.68427925,619.31138775
+prompt_results.csv,duration,NoCompressionPrompt,_ctgan.transformer,30,110.92824303333333,54.418262999999996,167.90767212898325,52.448158250000006,62.1172955
+prompt_results.csv,duration,NoCompressionPrompt,transformers.tokenization_utils_base,30,136.75650356666668,42.2793655,260.1598824118513,40.168378000000004,52.83555725
+prompt_results.csv,duration,NoCompressionPrompt,transformers.pipelines.text_generation,30,557.6570532,310.211619,366.7107822154386,213.53910975,936.75073925
+prompt_results.csv,duration,NoCompressionPrompt,transformers.data.metrics.squad_metrics,30,97.51018506666665,34.825061500000004,147.2043243451507,30.726111500000002,109.922149
+prompt_results.csv,duration,NoCompressionPrompt,nn.modules.rnn,30,639.5542299666668,245.421154,533.1002222513576,219.5965875,1114.31391925
+prompt_results.csv,duration,NoCompressionPrompt,_numpy._util,30,564.4609820666666,296.60767450000003,478.5380810756694,224.11672875,1250.19159275
+prompt_results.csv,duration,NoCompressionPrompt,_numpy._funcs,30,538.1378304333333,225.00582,538.6303496891586,215.58536400000003,1099.09570775
+prompt_results.csv,duration,NoCompressionPrompt,_numpy._ufuncs,30,688.8311223666667,255.58380449999999,666.231142871212,228.4294825,825.3955105
+prompt_results.csv,duration,NoCompressionPrompt,_numpy._normalizations,30,529.2714439,233.06996099999998,601.832746139368,223.180385,244.38908275
+prompt_results.csv,score,DefaultPrompt,_numpy._ndarray,60,0.09962686567164178,0.08208955223880597,0.10935176428673159,0.0,0.17164179104477612
+prompt_results.csv,score,DefaultPrompt,_numpy._getlimits,60,0.21111111111111114,0.0,0.3066535655925862,0.0,0.3333333333333333
+prompt_results.csv,score,DefaultPrompt,nn.attention.bias,60,0.06742424242424241,0.06818181818181818,0.059171846114921045,0.0,0.06818181818181818
+prompt_results.csv,score,DefaultPrompt,nn.attention.flex_attention,60,0.01450980392156863,0.01764705882352941,0.026698732504777084,0.0,0.01764705882352941
+prompt_results.csv,score,DefaultPrompt,_ForestDiffusion.diffusion_with_trees_class,60,0.011352657004830914,0.014492753623188406,0.006021017415312828,0.014492753623188406,0.014492753623188406
+prompt_results.csv,score,DefaultPrompt,_ctgan.transformer,60,0.1290322580645161,0.0967741935483871,0.1266872755210163,0.0,0.22580645161290322
+prompt_results.csv,score,DefaultPrompt,transformers.tokenization_utils_base,60,0.0,0.0,0.0,0.0,0.0
+prompt_results.csv,score,DefaultPrompt,transformers.pipelines.text_generation,60,0.010893854748603353,0.01675977653631285,0.008061364223318003,0.0,0.01675977653631285
+prompt_results.csv,score,DefaultPrompt,transformers.data.metrics.squad_metrics,60,0.13216783216783215,0.0944055944055944,0.1110120377916197,0.04370629370629371,0.21678321678321677
+prompt_results.csv,score,DefaultPrompt,nn.modules.rnn,60,0.07393267651888343,0.03571428571428571,0.07394516952722667,0.0,0.15517241379310345
+prompt_results.csv,score,DefaultPrompt,_numpy._util,60,0.25472972972972974,0.3445945945945946,0.16320524581058463,0.08108108108108109,0.3783783783783784
+prompt_results.csv,score,DefaultPrompt,_numpy._funcs,60,0.6522222222222219,0.8666666666666667,0.4033927054711943,0.0,0.9333333333333333
+prompt_results.csv,score,DefaultPrompt,_numpy._ufuncs,60,0.193859649122807,0.3157894736842105,0.16654298429722525,0.0,0.3157894736842105
+prompt_results.csv,score,DefaultPrompt,_numpy._normalizations,60,0.09240506329113925,0.05063291139240506,0.09811389555426073,0.0,0.189873417721519
+prompt_results.csv,score,UncoveredTargetsPrompt,_numpy._ndarray,60,0.025621890547263677,0.0,0.06536385608911106,0.0,0.0
+prompt_results.csv,score,UncoveredTargetsPrompt,_numpy._getlimits,60,0.01111111111111111,0.0,0.060340111573130836,0.0,0.0
+prompt_results.csv,score,UncoveredTargetsPrompt,nn.attention.bias,60,0.02083333333333333,0.0,0.04956239137906726,0.0,0.0
+prompt_results.csv,score,UncoveredTargetsPrompt,nn.attention.flex_attention,60,0.006274509803921568,0.0,0.01505046606736277,0.0,0.0
+prompt_results.csv,score,UncoveredTargetsPrompt,_ForestDiffusion.diffusion_with_trees_class,60,0.00024154589371980676,0.0,0.0018710064474431966,0.0,0.0
+prompt_results.csv,score,UncoveredTargetsPrompt,_ctgan.transformer,60,0.06505376344086021,0.0,0.13769341329075183,0.0,0.0
+prompt_results.csv,score,UncoveredTargetsPrompt,transformers.tokenization_utils_base,60,0.004960835509138381,0.0,0.010722031057734182,0.0,0.0
+prompt_results.csv,score,UncoveredTargetsPrompt,transformers.pipelines.text_generation,60,0.004189944134078212,0.0,0.007318439368234969,0.0,0.004189944134078212
+prompt_results.csv,score,UncoveredTargetsPrompt,transformers.data.metrics.squad_metrics,60,0.008275058275058277,0.0,0.019663282675232617,0.0,0.0
+prompt_results.csv,score,UncoveredTargetsPrompt,nn.modules.rnn,60,0.05697865353037767,0.0,0.07986290749293853,0.0,0.15578817733990147
+prompt_results.csv,score,UncoveredTargetsPrompt,_numpy._util,60,0.009234234234234235,0.0,0.026153031359748714,0.0,0.0
+prompt_results.csv,score,UncoveredTargetsPrompt,_numpy._funcs,60,0.2333333333333333,0.0,0.37682387599733813,0.0,0.7333333333333333
+prompt_results.csv,score,UncoveredTargetsPrompt,_numpy._ufuncs,60,0.04415204678362573,0.0,0.11376562626662459,0.0,0.0
+prompt_results.csv,score,UncoveredTargetsPrompt,_numpy._normalizations,60,0.014556962025316457,0.0,0.033597796502999426,0.0,0.0
+prompt_results.csv,score,NoCompressionPrompt,_numpy._ndarray,30,0.011815920398009949,0.0,0.050081199126180295,0.0,0.0
+prompt_results.csv,score,NoCompressionPrompt,_numpy._getlimits,30,0.02222222222222222,0.0,0.08456937723415413,0.0,0.0
+prompt_results.csv,score,NoCompressionPrompt,nn.attention.bias,30,0.0,0.0,0.0,0.0,0.0
+prompt_results.csv,score,NoCompressionPrompt,nn.attention.flex_attention,30,0.001176470588235294,0.0,0.004477202324161101,0.0,0.0
+prompt_results.csv,score,NoCompressionPrompt,_ForestDiffusion.diffusion_with_trees_class,30,0.001932367149758454,0.0,0.005010810197706673,0.0,0.0
+prompt_results.csv,score,NoCompressionPrompt,_ctgan.transformer,30,0.04516129032258065,0.0,0.09606712402080593,0.0,0.0
+prompt_results.csv,score,NoCompressionPrompt,transformers.tokenization_utils_base,30,0.00110240789091964,0.0,0.003663584355763385,0.0,0.0
+prompt_results.csv,score,NoCompressionPrompt,transformers.pipelines.text_generation,30,0.004469273743016759,0.0,0.007538152711320732,0.0,0.012569832402234637
+prompt_results.csv,score,NoCompressionPrompt,transformers.data.metrics.squad_metrics,30,0.06736596736596737,0.0,0.10551194459757061,0.0,0.1625874125874126
+prompt_results.csv,score,NoCompressionPrompt,nn.modules.rnn,30,0.011658456486042693,0.0,0.04444305444252222,0.0,0.0
+prompt_results.csv,score,NoCompressionPrompt,_numpy._util,30,0.09504504504504506,0.0,0.16101189325385676,0.0,0.23310810810810811
+prompt_results.csv,score,NoCompressionPrompt,_numpy._funcs,30,0.14,0.0,0.3196501919453952,0.0,0.0
+prompt_results.csv,score,NoCompressionPrompt,_numpy._ufuncs,30,0.010526315789473684,0.0,0.05765500605317539,0.0,0.0
+prompt_results.csv,score,NoCompressionPrompt,_numpy._normalizations,30,0.0008438818565400844,0.0,0.004622131286963427,0.0,0.0

@@ -1,0 +1,20 @@
+---
+config:
+  title: "Parameter Generation Flow"
+  description: "Flowchart illustrating the process of generating function parameters using an LLM in the test factory."
+  theme: "neutral"
+references:
+  - "File: /pynguin/src/pynguin/testcase/llm_parameter_provider.py"
+  - "File: /pynguin/src/pynguin/testcase/testfactory.py"
+  - "File:
+    /pynguin/src/pynguin/large_language_model/prompts/parameter_generator_promp\
+    t.py"
+  - "File: /pynguin/src/pynguin/analyses/schema_extractor.py"
+---
+flowchart TD
+    TF["testfactory.py"] -->|"uses schema extracted from"| SE["schema_extractor.py"]
+    TF -->|"creates and uses provider from"| LP["llm_parameter_provider.py"]
+    LP -->|"uses prompt builder from"| PP["parameter_generator_prompt.py"]
+    PP -->|"builds prompt for"| LLM["LLM Agent"]
+    LLM -->|"generated parameter values"| LP
+    LP -->|"returns values"| TF

@@ -14,3 +14,4 @@ results
 .logs
 *.tar
 pynguin.yaml
+analysis/out

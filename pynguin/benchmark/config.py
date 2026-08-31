@@ -97,6 +97,9 @@ class ModelBenchmark:
         # Gemma
         "gemma4__e2b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "gemma4:e2b"),
         "gemma4__e4b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "gemma4:e4b"),
+        "gemma4__12b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "gemma4:12b"),
+        "gemma4__26b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "gemma4:26b"),
+        "gemma4__31b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "gemma4:31b"),
         # Olmo
         "olmo_3__7b": ModelBenchmarkExperiment(LLMProvider.OLLAMA, "olmo-3:7b"),
         # LFM
@@ -114,10 +117,14 @@ class ModelBenchmark:
     }
 
     _TO_RUN: ClassVar[set[str]] = {
-        "qwen2_5_coder__0_5b",
-        "qwen2_5_coder__1_5b",
-        "qwen2_5_coder__3b",
-        "gemma4__e2b",
+        "qwen2_5_coder__7b",
+        "qwen2_5__3b",
+        "qwen2_5__1_5b",
+        "qwen3__4b",
+        "qwen3_5__4b",
+        "gemma4__12b",
+        "gemma4__26b",
+        "gemma4__31b",
     }
 
     experiments: ClassVar[list] = []
@@ -164,12 +171,73 @@ class PromptBenchmark:
                 f"Module source code: `{self.module_code}`"
             )
 
+    class NoCompressionPrompt(UncoveredTargetsPrompt):
+        """Prompt implementation without compression."""
+
+        def __init__(
+            self,
+            callables: list[GenericCallableAccessibleObject],
+            module_code: str,
+            module_path: str,
+        ):
+            """Initializes the prompt.
+
+            Args:
+                callables (list[GenericCallableAccessibleObject]): List of
+                    uncovered callables.
+                module_path (str): Path to the module.
+                module_code (str): Source code of the module.
+            """
+            super().__init__(callables, module_code, module_path)
+
+        @override
+        def build_prompt(self) -> str:
+            """Builds the prompt message."""
+            callables_list = self.build_callables_prompt_section()
+            callables_section = "\n".join(callables_list)
+
+            # TODO (Oetgin): Finalize and test prompt compression
+
+            return f"""
+You are writing tests to be used as seed for a SBST algorithm. Your goal is to improve as much as possible the coverage of the tests.
+Write unit tests for the following callables that Pynguin failed to cover:
+{callables_section}
+Module path: `{self.module_path}`
+Module source code:
+```python
+{self.module_code}
+```
+You answer will be parsed for mutations, so here are the guidelines you need to follow:
+- Answer in a code block only using; one function for each test case, with NO ARGUMENTS, NO HELPER FUNCTIONS AND NO CLASSES.
+- If needed, instantiate vars in the body of the test func or use pytest.parametrize, but DO NOT USE ANY OTHER PYTEST FEATURE (e.g. DO NOT USE FIXTURES), as that will make the parsing fail.
+- Do not rewrite the SUT's code in the tests. If you want for example to call a function or instanciante a class, import it.
+- Without explaining, answer in simple, concise assertion tests, split in small functions. Follow the Arrange, Act, Assert pattern.
+
+Here are some examples; *NEVER DO*:
+def func_all_tests(param):
+    var0 = param
+    ...
+
+*INSTEAD DO*:
+I need to test the function `func` that takes a parameter and returns a value. I will test the following scenarios: ...
+```python
+from module_to_test import func
+def test_feat1():
+    var0 = ...
+    var1 = func(var0)
+    assert ...
+```
+
+REMEMBER: NO ARGUMENTS IN YOUR TEST FUNCTIONS (if you don't use pytest.parametrize)"
+"""  # noqa: E501
+
     _PROMPTS: ClassVar[dict] = {
         "default": PromptBenchmarkExperiment(DefaultPrompt),
         "ours": PromptBenchmarkExperiment(UncoveredTargetsPrompt),
+        "no_compression": PromptBenchmarkExperiment(NoCompressionPrompt),
     }
 
-    _TO_RUN: ClassVar[set[str]] = {"default", "ours"}
+    _TO_RUN: ClassVar[set[str]] = {"default", "ours", "no_compression"}
 
     experiments: ClassVar[list] = []
     for name, experiment in _PROMPTS.items():

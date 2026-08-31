@@ -219,7 +219,7 @@ You answer will be parsed for mutations, so here are the guidelines you need to 
 - Answer in a code block only using; one function for each test case, with NO ARGUMENTS, NO HELPER FUNCTIONS AND NO CLASSES.
 - If needed, instantiate vars in the body of the test func or use pytest.parametrize, but DO NOT USE ANY OTHER PYTEST FEATURE (e.g. DO NOT USE FIXTURES), as that will make the parsing fail.
 - Do not rewrite the SUT's code in the tests. If you want for example to call a function or instanciante a class, import it.
-- Without explaining, answer in simple, concise assertion tests, split in small functions. Follow the Arrange, Act, Assert pattern.
+- Think first then answer in simple, concise assertion tests, split in small functions. Follow the Arrange, Act, Assert pattern.
 
 Here are some examples; *NEVER DO*:
 def func_all_tests(param):

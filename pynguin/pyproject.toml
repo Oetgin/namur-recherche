@@ -123,6 +123,7 @@ optional = true
 [tool.poetry.group.benchmark.dependencies]
 tqdm = "^4"
 types-tqdm = "^4.68.0.20260608"
+matplotlib = "3.10"
 
 [tool.poetry.extras]
 ollama = [ "ollama", "python-dotenv" ]
